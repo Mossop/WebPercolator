@@ -241,7 +241,7 @@ public class ConfigurationSet extends Block
 		}
 		else
 		{
-			log.warn("No default table found");
+			//log.warn("No default table found");
 		}
 		if (!env.isDecided())
 		{

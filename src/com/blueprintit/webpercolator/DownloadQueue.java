@@ -33,10 +33,10 @@ public class DownloadQueue
 	private Map inprogress;
 	private List queue;
 	private Map cache;
-	private boolean abort;
 	private boolean running;
 	private HttpClient agent;
-	private List listeners;
+	private List downloadListeners;
+	private List queueListeners;
 	private HtmlLinkParser parser;
 	private Comparator ordering;
 	private boolean cancompare;
@@ -47,7 +47,8 @@ public class DownloadQueue
 		cancompare=true;
 		inprogress = new HashMap();
 		queue = new LinkedList();
-		listeners = new LinkedList();
+		downloadListeners = new LinkedList();
+		queueListeners = new LinkedList();
 		running=false;
 		manager = new MultiThreadedHttpConnectionManager();
 		agent = new HttpClient(manager);
@@ -80,28 +81,44 @@ public class DownloadQueue
 		agent.executeMethod(method);
 	}
 	
+	public void addQueueListener(QueueListener l)
+	{
+		synchronized(queueListeners)
+		{
+			queueListeners.add(l);
+		}
+	}
+	
+	public void removeQueueListener(QueueListener l)
+	{
+		synchronized(queueListeners)
+		{
+			queueListeners.remove(l);
+		}
+	}
+	
 	public void addDownloadListener(DownloadListener l)
 	{
-		synchronized(listeners)
+		synchronized(downloadListeners)
 		{
-			listeners.add(l);
+			downloadListeners.add(l);
 		}
 	}
 	
 	public void removeDownloadListener(DownloadListener l)
 	{
-		synchronized(listeners)
+		synchronized(downloadListeners)
 		{
-			listeners.remove(l);
+			downloadListeners.remove(l);
 		}
 	}
 	
 	void processDownloadEvent(DownloadEvent ev)
 	{
 		List list;
-		synchronized(listeners)
+		synchronized(downloadListeners)
 		{
-			list = new LinkedList(listeners);
+			list = new LinkedList(downloadListeners);
 		}
 		Iterator loop = list.iterator();
 		while (loop.hasNext())
@@ -164,19 +181,54 @@ public class DownloadQueue
 		checkWaiting();
 	}
 	
-	public void complete()
+	/*public void complete()
 	{
 		start();
 		waitFor();
-	}
+	}*/
 	
 	public synchronized void start()
 	{
-		if (!running)
+		if ((!running)&&(queue.size()>0))
 		{
+			List listeners;
+			synchronized(queueListeners)
+			{
+				listeners = new LinkedList(queueListeners);
+			}
+			QueueEvent e = new QueueEvent(this,QueueEvent.QUEUE_STARTED);
+			Iterator loop = listeners.iterator();
+			while (loop.hasNext())
+			{
+				QueueListener l = (QueueListener)loop.next();
+				l.queueStarted(this,e);
+			}
 			running=true;
-			abort=false;
 			checkWaiting();
+		}
+	}
+	
+	private void queueComplete()
+	{
+		List listeners;
+		synchronized(queueListeners)
+		{
+			listeners = new LinkedList(queueListeners);
+		}
+		QueueEvent e = new QueueEvent(this,QueueEvent.QUEUE_COMPLETE);
+		Iterator loop = listeners.iterator();
+		while (loop.hasNext())
+		{
+			QueueListener l = (QueueListener)loop.next();
+			l.queueComplete(this,e);
+		}		
+	}
+	
+	public synchronized void stop()
+	{
+		if (running)
+		{
+			running=false;
 		}
 	}
 	
@@ -187,7 +239,7 @@ public class DownloadQueue
 	
 	public synchronized void setHttpState(HttpState value)
 	{
-		if (running)
+		if (inprogress.size()>0)
 		{
 			// Assuming that this would be a bad thing.
 			throw new IllegalStateException("Cannot change Http state while downloading");
@@ -204,7 +256,7 @@ public class DownloadQueue
 	
 	private synchronized void checkWaiting()
 	{
-		if ((running)&&(!abort))
+		if (running)
 		{
 			int pos = 0;
 			while ((inprogress.size()<manager.getMaxTotalConnections())&&(pos<queue.size()))
@@ -242,7 +294,8 @@ public class DownloadQueue
 			}
 			if (inprogress.size()==0)
 			{
-				running=false;
+				assert queue.size()==0;
+				queueComplete();
 			}
 		}
 	}
@@ -286,7 +339,7 @@ public class DownloadQueue
 		checkWaiting();
 	}
 	
-	public void waitFor()
+	/*public void waitFor()
 	{
 		while (running)
 		{
@@ -298,5 +351,5 @@ public class DownloadQueue
 			{
 			}
 		}
-	}
+	}*/
 }

@@ -34,8 +34,10 @@ import com.blueprintit.webpercolator.DownloadEvent;
 import com.blueprintit.webpercolator.DownloadListener;
 import com.blueprintit.webpercolator.DownloadQueue;
 import com.blueprintit.webpercolator.HtmlLinkParser;
+import com.blueprintit.webpercolator.QueueEvent;
+import com.blueprintit.webpercolator.QueueListener;
 
-public class WebFetch implements DownloadListener
+public class WebFetch implements DownloadListener, QueueListener
 {
 	private Configuration config;
 	private DownloadQueue queue;
@@ -53,10 +55,13 @@ public class WebFetch implements DownloadListener
 	private int parsers;
 	private int deciders;
 	
+	private boolean running;
+	
 	private static Log log = LogFactory.getLog(WebFetch.class);
 	
 	public WebFetch(Configuration config)
 	{
+		running=false;
 		this.config=config;
 		queue = new DownloadQueue();
 		queue.addDownloadListener(this);
@@ -79,18 +84,22 @@ public class WebFetch implements DownloadListener
 		HtmlLinkParser parser = queue.getLinkParser();
 		for (int loop=0; loop<100; loop++)
 		{
-			deciders++;
 			(new DecisionThread(this,config,urlcache,filecache)).start();
+			deciders++;
 		}
 		for (int loop=0; loop<10; loop++)
 		{
-			parsers++;
 			(new ParsingThread(this,parser)).start();
+			parsers++;
 		}
 	}
 	
-	private boolean isFinished(boolean queueEvent)
+	private boolean isFinished()
 	{
+		if (!running)
+		{
+			return false;
+		}
 		synchronized(sleepingDeciders)
 		{
 			synchronized(sleepingParsers)
@@ -99,19 +108,9 @@ public class WebFetch implements DownloadListener
 				{
 					synchronized(awaitingParse)
 					{
-						if (queueEvent)
+						if (queue.getRemaining()>0)
 						{
-							if (queue.getRemaining()>1)
-							{
-								return false;
-							}
-						}
-						else
-						{
-							if (queue.getRemaining()>0)
-							{
-								return false;
-							}
+							return false;
 						}
 						if (sleepingDeciders.size()<deciders)
 						{
@@ -125,7 +124,7 @@ public class WebFetch implements DownloadListener
 						{
 							return false;
 						}
-						if (awaitingParse.size()>1)
+						if (awaitingParse.size()>0)
 						{
 							return false;
 						}
@@ -136,9 +135,9 @@ public class WebFetch implements DownloadListener
 		return true;
 	}
 	
-	public void potentiallyFinished(boolean queueEvent)
+	public void potentiallyFinished()
 	{
-		if (isFinished(queueEvent))
+		if (isFinished())
 		{
 			System.out.println("Downloads might be complete");
 		}
@@ -182,7 +181,7 @@ public class WebFetch implements DownloadListener
 		{
 			sleepingDeciders.add(thread);
 		}
-		potentiallyFinished(false);
+		potentiallyFinished();
 	}
 	
 	public void registerSleepingParser(ParsingThread thread)
@@ -191,7 +190,7 @@ public class WebFetch implements DownloadListener
 		{
 			sleepingParsers.add(thread);
 		}
-		potentiallyFinished(false);
+		potentiallyFinished();
 	}
 	
 	public void addEnvironmentForDecision(Environment env)
@@ -280,14 +279,12 @@ public class WebFetch implements DownloadListener
 		{
 			addParseDetails(new ParseDetails(download.getURL(),e.getLocalFile()));
 		}
-		else
-		{
-			potentiallyFinished(true);
-		}
 	}
 
 	public void downloadFailed(DownloadEvent e)
 	{
+		// TODO add checking for valid HTTP errors that should not be repeated
+		
 		Environment env = ((EnvironmentDownload)e.getDownload()).getEnvironment();
 		if (env.getAttempts()>0)
 		{
@@ -297,7 +294,6 @@ public class WebFetch implements DownloadListener
 		else
 		{
 			System.err.println("Failed to download "+e.getDownload().getURL()+": "+e.getException().getMessage());
-			potentiallyFinished(true);
 		}
 	}
 
@@ -309,6 +305,15 @@ public class WebFetch implements DownloadListener
 		addEnvironmentForDecision(newenv);
 	}
 	
+	public void queueStarted(Object sender, QueueEvent e)
+	{
+	}
+
+	public void queueComplete(Object sender, QueueEvent e)
+	{
+		potentiallyFinished();
+	}
+
 	public void addEnvironmentToDownload(Environment env)
 	{
 		env.setAttempts(env.getAttempts()-1);
@@ -318,6 +323,7 @@ public class WebFetch implements DownloadListener
 		
 	public void start()
 	{
+		running=true;
 		queue.start();
 	}
 	
