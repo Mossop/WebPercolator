@@ -24,6 +24,7 @@ public class DownloadSettings
 	private URLBuilder referer;
 	private File file;
 	private File base;
+	private String useragent;
 	private boolean overwrite;
 	private boolean parseLocal;
 	private boolean parseRemote;
@@ -74,6 +75,7 @@ public class DownloadSettings
 		env.setFile(file);
 		env.setAccepted(accept);
 		env.setRejected(reject);
+		env.setUserAgent(useragent);
 	}
 	
 	public void accept()
@@ -163,5 +165,15 @@ public class DownloadSettings
 	public void setParseRemote(boolean parse)
 	{
 		parseRemote = parse;
+	}
+	
+	public String getUserAgent()
+	{
+		return useragent;
+	}
+	
+	public void setUserAgent(String value)
+	{
+		useragent=value;
 	}
 }

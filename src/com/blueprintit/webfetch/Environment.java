@@ -23,6 +23,8 @@ public class Environment
 	private boolean parsingRemote = true;
 	private boolean accepted = false;
 	private boolean rejected = false;
+	private String useragent = null;
+	private static final String USERAGENT = "Mozilla/4.0 (compatible; Java; HttpClient; en-US) WebPercolator/1.0";
 	
 	public Environment(URL target)
 	{
@@ -123,5 +125,17 @@ public class Environment
 	public void setOverwriting(boolean overwriting)
 	{
 		this.overwriting = overwriting;
+	}
+
+	public String getUserAgent()
+	{
+		if (useragent==null)
+			return USERAGENT;
+		return useragent;
+	}
+	
+	public void setUserAgent(String value)
+	{
+		useragent=value;
 	}
 }

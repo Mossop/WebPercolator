@@ -34,6 +34,7 @@ public class EnvironmentDownload implements Download
 		{
 			method.setRequestHeader("Referer",environment.getReferer().toString());
 		}
+		method.setRequestHeader("User-Agent",environment.getUserAgent());
 	}
 	
 	public HttpMethod getHttpMethod()
@@ -54,6 +55,7 @@ public class EnvironmentDownload implements Download
 			{
 				method.setRequestHeader("Referer",environment.getReferer().toString());
 			}
+			method.setRequestHeader("User-Agent",environment.getUserAgent());
 			queue.executeMethod(method);
 			return new DownloadDetails(method);
 		}
