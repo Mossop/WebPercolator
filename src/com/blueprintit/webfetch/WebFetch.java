@@ -142,7 +142,9 @@ public class WebFetch
 			while (loop.hasNext())
 			{
 				URL url = (URL)loop.next();
-				Download download = config.getDownload(url);
+				Environment env = new Environment(url);
+				config.applyConfiguration(env);
+				Download download = env.getDownload();
 				if (download!=null)
 				{
 					downloads.add(download);
