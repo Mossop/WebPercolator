@@ -74,6 +74,11 @@ public class ConditionGroup extends ElementConfigParser implements ConditionSet
 		}
 	}
 	
+	public void addCondition(Condition condition)
+	{
+		conditions.add(condition);
+	}
+	
 	public boolean matches(ScriptingEnvironment env)
 	{
 		if (conditions.size()==0)
@@ -112,7 +117,7 @@ public class ConditionGroup extends ElementConfigParser implements ConditionSet
 		if (condition!=null)
 		{
 			condition.parseConfig(element);
-			conditions.add(condition);
+			addCondition(condition);
 			return true;
 		}
 		return false;

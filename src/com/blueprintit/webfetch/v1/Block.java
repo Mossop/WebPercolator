@@ -70,6 +70,11 @@ public class Block extends ConditionGroup implements ActionSet, ConditionSet
 		}
 	}
 	
+	public void addAction(Action action)
+	{
+		actions.add(action);
+	}
+	
 	public void execute(ConfigurationSet config, ScriptingEnvironment env)
 	{
 		Iterator loop = actions.iterator();
@@ -82,11 +87,26 @@ public class Block extends ConditionGroup implements ActionSet, ConditionSet
 
 	protected boolean parseSubElement(Element element) throws ConfigurationParseException
 	{
+		Condition condition = createCondition(element.getNodeName());
+		if (condition!=null)
+		{
+			condition.parseConfig(element);
+			addCondition(condition);
+			if (condition instanceof Action)
+			{
+				addAction((Action)condition);
+			}
+			return true;
+		}
 		Action action = createAction(element.getNodeName());
 		if (action!=null)
 		{
 			action.parseConfig(element);
-			actions.add(action);
+			addAction(action);
+			if (action instanceof Condition)
+			{
+				addCondition((Condition)action);
+			}
 			return true;
 		}
 		return super.parseSubElement(element);
