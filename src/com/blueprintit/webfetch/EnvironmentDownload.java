@@ -59,11 +59,6 @@ public class EnvironmentDownload implements Download
 		}
 	}
 
-	public boolean isParsable()
-	{
-		return environment.isParsing();
-	}
-	
 	public Environment getEnvironment()
 	{
 		return environment;

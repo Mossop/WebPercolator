@@ -50,6 +50,9 @@ public class WebFetch implements DownloadListener
 	private List sleepingParsers;
 	private List sleepingDeciders;
 	
+	private int parsers;
+	private int deciders;
+	
 	private static Log log = LogFactory.getLog(WebFetch.class);
 	
 	public WebFetch(Configuration config)
@@ -70,15 +73,53 @@ public class WebFetch implements DownloadListener
 		awaitingDecision = new LinkedList();
 		awaitingParse = new LinkedList();
 		
+		parsers=0;
+		deciders=0;
+		
 		HtmlLinkParser parser = queue.getLinkParser();
 		for (int loop=0; loop<100; loop++)
 		{
-			(new DecisionThread(this,config)).start();
+			(new DecisionThread(this,config,urlcache,filecache)).start();
+			deciders++;
 		}
 		for (int loop=0; loop<10; loop++)
 		{
 			(new ParsingThread(this,parser)).start();
+			parsers++;
 		}
+	}
+	
+	private boolean isFinished()
+	{
+		synchronized(sleepingDeciders)
+		{
+			synchronized(sleepingParsers)
+			{
+				synchronized(awaitingDecision)
+				{
+					synchronized(awaitingParse)
+					{
+						if (sleepingDeciders.size()<deciders)
+						{
+							return false;
+						}
+						if (sleepingParsers.size()<parsers)
+						{
+							return false;
+						}
+						if (awaitingDecision.size()>0)
+						{
+							return false;
+						}
+						if (awaitingParse.size()>0)
+						{
+							return false;
+						}
+					}
+				}
+			}
+		}
+		return true;
 	}
 	
 	private void wakeDecider()
@@ -232,80 +273,10 @@ public class WebFetch implements DownloadListener
 	
 	public void addEnvironmentToDownload(Environment env)
 	{
-		synchronized(urlcache)
-		{
-			if (urlcache.contains(env.getTarget()))
-			{
-				return;
-			}
-			urlcache.add(env.getTarget());
-		}
-		if (env.getFile()==null)
-		{
-			if (env.isParsing())
-			{
-				//System.out.println("Added: "+env.getTarget());
-				queue.add(new EnvironmentDownload(env));
-				queue.start();
-			}
-			else
-			{
-				log.info("No point in downloading "+env.getTarget());
-			}
-		}
-		else
-		{
-			File target = env.getFile();
-			synchronized(filecache)
-			{
-				if (filecache.containsKey(target))
-				{
-					if (env.isParsing())
-					{
-						filecache.put(target,Boolean.TRUE);
-					}
-					return;
-				}
-				if ((!target.exists())||(env.isOverwriting()))
-				{
-					File parent = target.getParentFile();
-					if ((parent.isDirectory())||((checkDirectory(parent))&&(parent.mkdirs())))
-					{
-						//System.out.println("Added: "+env.getTarget());
-						queue.add(new EnvironmentDownload(env));
-						queue.start();
-						filecache.put(target,Boolean.valueOf(env.isParsing()));
-					}
-					else
-					{
-						log.error("Would be unable to store at "+env.getFile());
-					}
-				}
-				else if (env.isParsing())
-				{
-					//System.out.println("Parsing local: "+env.getTarget());
-					addParseDetails(new ParseDetails(env.getTarget(),env.getFile()));
-				}
-			}
-		}
+		queue.add(new EnvironmentDownload(env));
+		queue.start();
 	}
 		
-	private boolean checkDirectory(File dir)
-	{
-		if (dir.isDirectory())
-		{
-			return true;
-		}
-		else if (dir.exists())
-		{
-			return false;
-		}
-		else
-		{
-			return checkDirectory(dir.getParentFile());
-		}
-	}
-	
 	public void start()
 	{
 		queue.start();

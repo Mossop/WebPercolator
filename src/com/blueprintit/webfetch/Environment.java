@@ -18,7 +18,8 @@ public class Environment
 	private URL referer;
 	private File file = null;
 	private boolean overwriting = false;
-	private boolean parsing = true;
+	private boolean parsingLocal = true;
+	private boolean parsingRemote = true;
 	private boolean accepted = false;
 	private boolean rejected = false;
 	
@@ -83,14 +84,24 @@ public class Environment
 		this.file = file;
 	}
 	
-	public boolean isParsing()
+	public boolean isParsingLocal()
 	{
-		return parsing;
+		return parsingLocal;
 	}
 	
-	public void setParsing(boolean parsing)
+	public void setParsingLocal(boolean parsing)
 	{
-		this.parsing = parsing;
+		this.parsingLocal = parsing;
+	}
+	
+	public boolean isParsingRemote()
+	{
+		return parsingRemote;
+	}
+	
+	public void setParsingRemote(boolean parsing)
+	{
+		this.parsingRemote = parsing;
 	}
 	
 	public boolean isOverwriting()

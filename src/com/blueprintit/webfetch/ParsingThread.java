@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
-
 import com.blueprintit.webpercolator.HtmlLinkParser;
 import com.blueprintit.webpercolator.Link;
 
@@ -84,8 +83,8 @@ public class ParsingThread implements Runnable
 						while (loop.hasNext())
 						{
 							Link link = (Link)loop.next();
-							Environment newenv = new Environment(link.getUrl(),base);
-							webfetch.addEnvironmentForDecision(newenv);
+							Environment env = new Environment(link.getUrl(),base);
+							webfetch.addEnvironmentForDecision(env);
 						}
 					}
 					catch (IOException e)

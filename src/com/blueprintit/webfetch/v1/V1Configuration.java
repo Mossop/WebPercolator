@@ -63,6 +63,45 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 				throw new ConfigurationParseException("Illegal url",e);
 			}
 		}
+		if (element.getNodeName().equals("UrlSet"))
+		{
+			if ((element.hasAttribute("start"))&&(element.hasAttribute("end")))
+			{
+				try
+				{
+					int width = 1;
+					if (element.hasAttribute("padding"))
+					{
+						width=Integer.parseInt(element.getAttribute("padding"));
+					}
+					int start = Integer.parseInt(element.getAttribute("start"));
+					int end = Integer.parseInt(element.getAttribute("end"));
+					String base = getElementText(element);
+					for (int loop=start; loop<=end; loop++)
+					{
+						String number = ""+loop;
+						while (number.length()<width)
+						{
+							number="0"+number;
+						}
+						urls.add(new URL(base.replaceAll("#",number)));
+					}
+					return true;
+				}
+				catch (MalformedURLException e)
+				{
+					throw new ConfigurationParseException("Invalid url generated from UrlSet",e);
+				}
+				catch (NumberFormatException e)
+				{
+					throw new ConfigurationParseException("Invalid number",e);
+				}
+			}
+			else
+			{
+				throw new ConfigurationParseException("A start and end must be specified for the UrlSet");
+			}
+		}
 		if (element.getNodeName().equals("Authenticate"))
 		{
 			AuthenticationDetails details = new AuthenticationDetails();

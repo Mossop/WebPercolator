@@ -25,7 +25,8 @@ public class DownloadSettings
 	private File file;
 	private File base;
 	private boolean overwrite;
-	private boolean parse;
+	private boolean parseLocal;
+	private boolean parseRemote;
 	private boolean accept;
 	private boolean reject;
 	private static Log log = LogFactory.getLog(DownloadSettings.class);
@@ -38,7 +39,8 @@ public class DownloadSettings
 			referer = new URLBuilder(env.getReferer());
 		accept=env.isAccepted();
 		reject=env.isRejected();
-		parse=env.isParsing();
+		parseLocal=env.isParsingLocal();
+		parseRemote=env.isParsingRemote();
 		overwrite=env.isOverwriting();
 		file=env.getFile();
 	}
@@ -66,7 +68,8 @@ public class DownloadSettings
 		{
 			env.setReferer(null);
 		}
-		env.setParsing(parse);
+		env.setParsingLocal(parseLocal);
+		env.setParsingRemote(parseRemote);
 		env.setOverwriting(overwrite);
 		env.setFile(file);
 		env.setAccepted(accept);
@@ -142,13 +145,23 @@ public class DownloadSettings
 		this.overwrite = overwrite;
 	}
 
-	public boolean isParse()
+	public boolean isParseLocal()
 	{
-		return parse;
+		return parseLocal;
 	}
 
-	public void setParse(boolean parse)
+	public void setParseLocal(boolean parse)
 	{
-		this.parse = parse;
+		parseLocal = parse;
+	}
+
+	public boolean isParseRemote()
+	{
+		return parseRemote;
+	}
+
+	public void setParseRemote(boolean parse)
+	{
+		parseRemote = parse;
 	}
 }
