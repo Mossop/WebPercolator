@@ -20,7 +20,7 @@ import com.blueprintit.webpercolator.DownloadQueue;
 
 /**
  * $Author$
- * $Source$
+ * $RCSFile$
  * $Date$
  * $Revision$
  *
