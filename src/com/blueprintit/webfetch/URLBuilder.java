@@ -82,7 +82,7 @@ public class URLBuilder
 	public String toString()
 	{
 		String porttext = "";
-		if (port!=80)
+		if (port>0)
 		{
 			porttext=":"+port;
 		}

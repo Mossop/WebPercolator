@@ -11,7 +11,12 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.JavaScriptException;
+import org.mozilla.javascript.Scriptable;
+
 import com.blueprintit.webfetch.Environment;
+import com.blueprintit.webfetch.URLBuilder;
 
 /**
  * @author Dave
@@ -20,6 +25,8 @@ public class ScriptingEnvironment
 {
 	private Environment env;
 	private Map custom;
+	private Context jsContext;
+	private Scriptable jsScope;
 	
 	/**
 	 * @param env
@@ -27,6 +34,29 @@ public class ScriptingEnvironment
 	public ScriptingEnvironment(Environment env)
 	{
 		this.env=env;
+		jsContext = Context.enter();
+		jsScope = jsContext.initStandardObjects();
+		Scriptable target = jsContext.toObject(new URLBuilder(env.getTarget()),jsScope);
+		jsScope.put("target",jsScope,target);
+	}
+	
+	public String evaluate(String script)
+	{
+		try
+		{
+			Object result = jsContext.evaluateString(jsScope,script,"",1,null);
+			return jsContext.toString(result);
+		}
+		catch (JavaScriptException e)
+		{
+			System.err.println("Error executing script");
+			return "";
+		}
+	}
+	
+	public void exit()
+	{
+		jsContext.exit();
 	}
 	
 	public boolean getAccepted()

@@ -107,7 +107,16 @@ public class ConfigurationSet extends ConditionSet
 	}
 	
 	private void doApplyConfigurationSet(ScriptingEnvironment env)
-	{	
+	{
+		Table start = findTable("");
+		if (start!=null)
+		{
+			start.execute(this,env);
+		}
+		else
+		{
+			System.err.println("No default table found");
+		}
 	}
 	
 	protected void applyConfigurationSet(ScriptingEnvironment env)

@@ -6,6 +6,7 @@
  */
 package com.blueprintit.webfetch.v1;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.w3c.dom.Element;
@@ -26,7 +27,7 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 	
 	public Collection getURLs()
 	{
-		return null;
+		return new ArrayList();
 	}
 
 	public void applyConfiguration(Environment env)
@@ -40,5 +41,6 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 		{
 			env.setRejected(true);
 		}
+		scope.exit();
 	}
 }

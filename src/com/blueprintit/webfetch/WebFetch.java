@@ -61,7 +61,7 @@ public class WebFetch
 			{
 				Document document = builder.parse(file);
 				Element root = document.getDocumentElement();
-				if ((root.getLocalName().equals("WebFetchConfig"))&&(root.hasAttribute("version")))
+				if ((root.getNodeName().equals("WebFetchConfig"))&&(root.hasAttribute("version")))
 				{
 					int version = Integer.parseInt(root.getAttribute("version"));
 					ConfigurationParser parser;

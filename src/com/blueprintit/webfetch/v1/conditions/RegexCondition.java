@@ -46,7 +46,7 @@ public class RegexCondition extends AbstractCondition
 
 	public boolean checkForMatch(ScriptingEnvironment env)
 	{
-		return pattern.matcher(env.getValue(target)).matches();
+		return pattern.matcher(env.evaluate(target)).matches();
 	}
 
 }

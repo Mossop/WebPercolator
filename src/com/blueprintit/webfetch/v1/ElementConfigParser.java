@@ -34,7 +34,7 @@ public abstract class ElementConfigParser
 
 	protected abstract boolean parseSubElement(Element element) throws ConfigurationParseException;
 	
-	protected void parseConfig(Element element) throws ConfigurationParseException
+	public void parseConfig(Element element) throws ConfigurationParseException
 	{
 		NodeList nodes = element.getChildNodes();
 		for (int loop=0; loop<nodes.getLength(); loop++)
@@ -44,7 +44,7 @@ public abstract class ElementConfigParser
 			{
 				if (!parseSubElement((Element)node))
 				{
-					throw new ConfigurationParseException("Unknown element in configuration: "+element.getNodeName());
+					throw new ConfigurationParseException("Unknown element in configuration: "+node.getNodeName());
 				}
 			}
 		}

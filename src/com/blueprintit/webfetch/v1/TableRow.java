@@ -30,6 +30,8 @@ public class TableRow extends ConditionSet implements Action
 		actionmap.put("Accept","com.blueprintit.webfetch.v1.actions.AcceptAction");
 		actionmap.put("Reject","com.blueprintit.webfetch.v1.actions.RejectAction");
 		actionmap.put("Call","com.blueprintit.webfetch.v1.actions.CallAction");
+		actionmap.put("Log","com.blueprintit.webfetch.v1.actions.LogAction");
+		actionmap.put("Script","com.blueprintit.webfetch.v1.actions.ScriptAction");
 	}
 	
 	public TableRow()

@@ -14,39 +14,39 @@ import java.net.URL;
  */
 public class Environment
 {
-	private URLBuilder target;
-	private URLBuilder referer;
+	private URL target;
+	private URL referer;
 	private File file = null;
 	private boolean accepted = false;
 	private boolean rejected = false;
 	
 	public Environment(URL target)
 	{
-		this.target=new URLBuilder(target);
+		this.target=target;
 	}
 	
 	public Environment(URL target, URL referer)
 	{
-		this.target=new URLBuilder(target);
-		this.referer=new URLBuilder(referer);
+		this.target=target;
+		this.referer=referer;
 	}
 
-	public URLBuilder getReferer()
+	public URL getReferer()
 	{
 		return referer;
 	}
 	
-	public void setReferer(URLBuilder referer)
+	public void setReferer(URL referer)
 	{
 		this.referer = referer;
 	}
 	
-	public URLBuilder getTarget()
+	public URL getTarget()
 	{
 		return target;
 	}
 	
-	public void setTarget(URLBuilder target)
+	public void setTarget(URL target)
 	{
 		this.target = target;
 	}
