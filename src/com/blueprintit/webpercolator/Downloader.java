@@ -4,8 +4,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 
@@ -17,14 +17,12 @@ public class Downloader implements Runnable
 	private Download download;
 	private DownloadQueue queue;
 	private boolean running;
-	private HttpClient agent;
 	
 	/**
 	 * @param r
 	 */
-	public Downloader(HttpClient hclient, DownloadQueue q, Download r)
+	public Downloader(DownloadQueue q, Download r)
 	{
-		agent=hclient;
 		queue=q;
 		download=r;
 		running=false;
@@ -45,42 +43,69 @@ public class Downloader implements Runnable
 	public void run()
 	{
 		queue.processDownloadEvent(new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_STARTED));
+		HttpMethod method = download.getHttpMethod();
 		try
 		{
-			OutputStream out = new FileOutputStream(download.getLocalFile());
-			HttpMethod method = download.getHttpMethod();
-			try
+			queue.executeMethod(method);
+			if ((method.getStatusCode()>=200)&&(method.getStatusCode()<300))
 			{
-				agent.executeMethod(method);
-				InputStream in = method.getResponseBodyAsStream();
-				byte[] buffer = new byte[1024];
-				int count = in.read(buffer);
-				while (count>=0)
+				try
 				{
-					if (count>0)
-						out.write(buffer,0,count);
-					count = in.read(buffer);
+					OutputStream out = new FileOutputStream(download.getLocalFile());
+					try
+					{
+						InputStream in = method.getResponseBodyAsStream();
+						byte[] buffer = new byte[1024];
+						int count = in.read(buffer);
+						while (count>=0)
+						{
+							if (count>0)
+								out.write(buffer,0,count);
+							count = in.read(buffer);
+						}
+						out.close();
+						in.close();
+						method.releaseConnection();
+						queue.processDownloadEvent(new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_COMPLETE));
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+						method.releaseConnection();
+						out.close();
+						queue.processDownloadEvent(new DownloadEvent(queue,this,download,e));
+					}
 				}
-				out.close();
-				in.close();
-				method.releaseConnection();
-				queue.processDownloadEvent(new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_COMPLETE));
+				catch (IOException e) // Thrown when the file could not be opened for writing.
+				{
+					e.printStackTrace();
+					method.releaseConnection();
+					queue.processDownloadEvent(new DownloadEvent(queue,this,download,e));
+				}
 			}
-			catch (HttpException e)
+			else if ((method.getStatusCode()>=300)&&(method.getStatusCode()<400))
+			{
+				URL redirect = new URL(method.getResponseHeader("Location").getValue());
+				System.out.println("Redirect to: "+redirect.toString());
+				method.releaseConnection();
+				queue.processDownloadEvent(new DownloadEvent(queue,this,download,redirect));
+			}
+			else
 			{
 				method.releaseConnection();
-				out.close();
-				queue.processDownloadEvent(new DownloadEvent(queue,this,download,e));
-			}
-			catch (IOException e)
-			{
-				method.releaseConnection();
-				out.close();
-				queue.processDownloadEvent(new DownloadEvent(queue,this,download,e));
+				queue.processDownloadEvent(new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_FAILED));
 			}
 		}
-		catch (IOException e) // Thrown when the file could not be opened for writing.
+		catch (HttpException e)
 		{
+			e.printStackTrace();
+			method.releaseConnection();
+			queue.processDownloadEvent(new DownloadEvent(queue,this,download,e));
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			method.releaseConnection();
 			queue.processDownloadEvent(new DownloadEvent(queue,this,download,e));
 		}
 		running=false;

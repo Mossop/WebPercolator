@@ -1,5 +1,7 @@
 package com.blueprintit.webpercolator;
 
+import java.net.URL;
+
 /**
  * @author Dave
  */
@@ -10,10 +12,12 @@ public class DownloadEvent
 	private Download download;
 	private int type;
 	private Exception exception;
+	private URL redirect;
 	
 	public static final int DOWNLOAD_STARTED = 0;
 	public static final int DOWNLOAD_UPDATE = 1;
 	public static final int DOWNLOAD_COMPLETE = 2;
+	public static final int DOWNLOAD_REDIRECTED = 3;
 	public static final int DOWNLOAD_FAILED = -1;
 	
 	public DownloadEvent(DownloadQueue q, Downloader d, Download r, int type)
@@ -28,6 +32,20 @@ public class DownloadEvent
 	{
 		this(q,d,r,DOWNLOAD_FAILED);
 		exception=e;
+	}
+	
+	public DownloadEvent(DownloadQueue q, Downloader d, Download r, URL u)
+	{
+		this(q,d,r,DOWNLOAD_REDIRECTED);
+		redirect=u;
+	}
+	
+	/**
+	 * @return Returns the url that the request was redirected to.
+	 */
+	public URL getRedirectURL()
+	{
+		return redirect;
 	}
 	
 	/**

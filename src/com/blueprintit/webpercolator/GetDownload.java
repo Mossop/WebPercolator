@@ -1,6 +1,7 @@
 package com.blueprintit.webpercolator;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -8,6 +9,7 @@ import java.util.List;
 
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.HeadMethod;
 
 /**
  * @author Dave
@@ -19,6 +21,11 @@ public class GetDownload implements DownloadListener, Download
 	private URL referer;
 	private int type;
 	private File local;
+	
+	public GetDownload(String url, File local) throws MalformedURLException
+	{
+		this(new URL(url),local);
+	}
 	
 	public GetDownload(URL url, File local)
 	{
@@ -111,11 +118,36 @@ public class GetDownload implements DownloadListener, Download
 	}
 
 	/**
+	 * @see com.blueprintit.webpercolator.DownloadListener#downloadRedirected(com.blueprintit.webpercolator.DownloadEvent)
+	 */
+	public void downloadRedirected(DownloadEvent e)
+	{
+		synchronized(listeners)
+		{
+			Iterator loop = listeners.iterator();
+			while (loop.hasNext())
+			{
+				((DownloadListener)loop.next()).downloadRedirected(e);
+			}
+		}
+	}
+
+	/**
 	 * @see com.blueprintit.webpercolator.Download#getHttpMethod()
 	 */
 	public HttpMethod getHttpMethod()
 	{
 		GetMethod method = new GetMethod(url.toString());
+		if (referer!=null)
+		{
+			method.setRequestHeader("Referer",referer.toString());
+		}
+		return method;
+	}
+
+	public HeadMethod getHeadMethod()
+	{
+		HeadMethod method = new HeadMethod(url.toString());
 		if (referer!=null)
 		{
 			method.setRequestHeader("Referer",referer.toString());

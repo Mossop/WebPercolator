@@ -1,5 +1,8 @@
 package com.blueprintit.webpercolator;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -8,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
@@ -35,6 +40,11 @@ public class DownloadQueue
 		MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
 		agent = new HttpClient(manager);
 		maxdownloads=10;
+	}
+	
+	public void executeMethod(HttpMethod method) throws HttpException, IOException
+	{
+		agent.executeMethod(method);
 	}
 	
 	public void addDownloadListener(DownloadListener l)
@@ -75,6 +85,9 @@ public class DownloadQueue
 					case DownloadEvent.DOWNLOAD_FAILED:
 						listener.downloadFailed(ev);
 						break;
+					case DownloadEvent.DOWNLOAD_REDIRECTED:
+						listener.downloadRedirected(ev);
+						break;
 				}
 			}
 		}
@@ -95,12 +108,16 @@ public class DownloadQueue
 				case DownloadEvent.DOWNLOAD_FAILED:
 					listener.downloadFailed(ev);
 					break;
+				case DownloadEvent.DOWNLOAD_REDIRECTED:
+					listener.downloadRedirected(ev);
+					break;
 			}
 		}
 		switch (ev.getType())
 		{
 			case DownloadEvent.DOWNLOAD_COMPLETE:
 			case DownloadEvent.DOWNLOAD_FAILED:
+			case DownloadEvent.DOWNLOAD_REDIRECTED:
 				inprogress.remove(ev.getDownload());
 				checkWaiting();
 				break;
@@ -149,7 +166,7 @@ public class DownloadQueue
 		while ((!abort)&&(inprogress.size()<maxdownloads)&&(queue.size()>0))
 		{
 			Download r = (Download)queue.remove(0);
-			Downloader d = new Downloader(agent,this,r);
+			Downloader d = new Downloader(this,r);
 			inprogress.put(r,d);
 			d.start();
 		}
@@ -181,5 +198,15 @@ public class DownloadQueue
 			{
 			}
 		}
+	}
+	
+	public static void main(String[] args) throws MalformedURLException
+	{
+		DownloadQueue queue = new DownloadQueue();
+		Download down = new GetDownload("http://www.blueprintit.co.uk",new File("c:\\test.html"));
+		queue.add(down);
+		queue.start();
+		queue.waitFor();
+		System.out.println("Complete");
 	}
 }

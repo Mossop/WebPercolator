@@ -12,4 +12,6 @@ public interface DownloadListener
 	public void downloadComplete(DownloadEvent e);
 	
 	public void downloadFailed(DownloadEvent e);
+	
+	public void downloadRedirected(DownloadEvent e);
 }
