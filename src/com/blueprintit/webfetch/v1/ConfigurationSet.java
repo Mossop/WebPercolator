@@ -100,11 +100,11 @@ public class ConfigurationSet extends ConditionSet
 		return super.parseSubElement(element);
 	}
 	
-	private void doApplyConfiguration(ScriptingEnvironment env)
+	private void doApplyConfigurationSet(ScriptingEnvironment env)
 	{	
 	}
 	
-	protected void applyConfiguration(ScriptingEnvironment env)
+	protected void applyConfigurationSet(ScriptingEnvironment env)
 	{
 		Iterator loop = configsets.iterator();
 		while (loop.hasNext())
@@ -112,12 +112,12 @@ public class ConfigurationSet extends ConditionSet
 			ConfigurationSet config = (ConfigurationSet)loop.next();
 			if (config.matches(env))
 			{
-				config.applyConfiguration(env);
+				config.applyConfigurationSet(env);
 				if (env.getRejected()||env.getAccepted())
 					return;
 			}
 		}
-		doApplyConfiguration(env);
+		doApplyConfigurationSet(env);
 	}
 	
 	public Table findTable(String name)

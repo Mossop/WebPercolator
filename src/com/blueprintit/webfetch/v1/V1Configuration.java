@@ -28,7 +28,7 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 		ScriptingEnvironment scope = new ScriptingEnvironment(env);
 		if (matches(scope))
 		{
-			applyConfiguration(scope);
+			applyConfigurationSet(scope);
 		}
 		else
 		{
