@@ -22,7 +22,7 @@ public class URLBuilder
 	private String scheme = "http";
 	private String host = "localhost";
 	private String path = "/";
-	private String query = null;
+	private URLQuery query = null;
 	private int port = -1;
 	private String fragment;
 	
@@ -92,7 +92,7 @@ public class URLBuilder
 			{
 				path="/";
 			}
-			query=matcher.group(6);
+			query=new URLQuery(matcher.group(6));
 			fragment=matcher.group(7);
 		}
 		else
@@ -110,7 +110,7 @@ public class URLBuilder
 		{
 			path="/"+path;
 		}
-		query=url.getQuery();
+		query=new URLQuery(url.getQuery());
 		host=url.getHost();
 	}
 	
@@ -185,7 +185,7 @@ public class URLBuilder
 		this.port = port;
 	}
 	
-	public String getQuery()
+	public URLQuery getQuery()
 	{
 		return query;
 	}
@@ -194,7 +194,7 @@ public class URLBuilder
 	{
 		if (QUERY_REGEX.matcher(query).matches())
 		{
-			this.query=query;
+			this.query=new URLQuery(query);
 		}
 		else
 		{
