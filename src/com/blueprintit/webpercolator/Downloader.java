@@ -1,5 +1,6 @@
 package com.blueprintit.webpercolator;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +43,7 @@ public class Downloader implements Runnable
 	 */
 	public void run()
 	{
-		queue.processDownloadEvent(new DownloadEvent(queue,download,DownloadEvent.DOWNLOAD_STARTED));
+		queue.processDownloadEvent(new DownloadEvent(queue,download,null,DownloadEvent.DOWNLOAD_STARTED));
 		HttpMethod method = download.getHttpMethod();
 		try
 		{
@@ -51,7 +52,13 @@ public class Downloader implements Runnable
 			{
 				try
 				{
-					OutputStream out = new FileOutputStream(download.getLocalFile());
+					File target = download.getLocalFile();
+					if (target==null)
+					{
+						target = File.createTempFile("dqtemp",null);
+						target.deleteOnExit();
+					}
+					OutputStream out = new FileOutputStream(target);
 					try
 					{
 						InputStream in = method.getResponseBodyAsStream();
@@ -66,21 +73,21 @@ public class Downloader implements Runnable
 						out.close();
 						in.close();
 						method.releaseConnection();
-						queue.processDownloadEvent(new DownloadEvent(queue,download,DownloadEvent.DOWNLOAD_COMPLETE));
+						queue.processDownloadEvent(new DownloadEvent(queue,download,target,DownloadEvent.DOWNLOAD_COMPLETE));
 					}
 					catch (IOException e)
 					{
 						e.printStackTrace();
 						method.releaseConnection();
 						out.close();
-						queue.processDownloadEvent(new DownloadEvent(queue,download,e));
+						queue.processDownloadEvent(new DownloadEvent(queue,download,target,e));
 					}
 				}
 				catch (IOException e) // Thrown when the file could not be opened for writing.
 				{
 					e.printStackTrace();
 					method.releaseConnection();
-					queue.processDownloadEvent(new DownloadEvent(queue,download,e));
+					queue.processDownloadEvent(new DownloadEvent(queue,download,null,e));
 				}
 			}
 			else if ((method.getStatusCode()>=300)&&(method.getStatusCode()<400))
@@ -93,20 +100,20 @@ public class Downloader implements Runnable
 			else
 			{
 				method.releaseConnection();
-				queue.processDownloadEvent(new DownloadEvent(queue,download,DownloadEvent.DOWNLOAD_FAILED));
+				queue.processDownloadEvent(new DownloadEvent(queue,download,null,DownloadEvent.DOWNLOAD_FAILED));
 			}
 		}
 		catch (HttpException e)
 		{
 			e.printStackTrace();
 			method.releaseConnection();
-			queue.processDownloadEvent(new DownloadEvent(queue,download,e));
+			queue.processDownloadEvent(new DownloadEvent(queue,download,null,e));
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 			method.releaseConnection();
-			queue.processDownloadEvent(new DownloadEvent(queue,download,e));
+			queue.processDownloadEvent(new DownloadEvent(queue,download,null,e));
 		}
 		running=false;
 	}

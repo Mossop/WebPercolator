@@ -171,4 +171,11 @@ public class GetDownload implements DownloadListener, Download
 		return type;
 	}
 
+	/**
+	 * @return Returns the url.
+	 */
+	public URL getUrl()
+	{
+		return url;
+	}
 }

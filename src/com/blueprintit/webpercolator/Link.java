@@ -49,4 +49,22 @@ public class Link
 	{
 		this.url = url;
 	}
+	
+	public int hashCode()
+	{
+		return url.hashCode();
+	}
+	
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof Link)
+		{
+			return url.equals(((Link)obj).url);
+		}
+		else if (obj instanceof URL)
+		{
+			return url.equals(obj);
+		}
+		return false;
+	}
 }

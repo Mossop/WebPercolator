@@ -1,5 +1,6 @@
 package com.blueprintit.webpercolator;
 
+import java.io.File;
 import java.net.URL;
 
 /**
@@ -12,6 +13,7 @@ public class DownloadEvent
 	private int type;
 	private Exception exception;
 	private URL redirect;
+	private File localFile;
 	
 	public static final int DOWNLOAD_STARTED = 0;
 	public static final int DOWNLOAD_UPDATE = 1;
@@ -19,22 +21,23 @@ public class DownloadEvent
 	public static final int DOWNLOAD_REDIRECTED = 3;
 	public static final int DOWNLOAD_FAILED = -1;
 	
-	public DownloadEvent(DownloadQueue q, Download r, int type)
+	public DownloadEvent(DownloadQueue q, Download r, File target, int type)
 	{
 		queue=q;
 		download=r;
 		this.type=type;
+		this.localFile=target;
 	}
 	
-	public DownloadEvent(DownloadQueue q, Download r, Exception e)
+	public DownloadEvent(DownloadQueue q, Download r, File target, Exception e)
 	{
-		this(q,r,DOWNLOAD_FAILED);
+		this(q,r,target,DOWNLOAD_FAILED);
 		exception=e;
 	}
 	
 	public DownloadEvent(DownloadQueue q, Download r, URL u)
 	{
-		this(q,r,DOWNLOAD_REDIRECTED);
+		this(q,r,null,DOWNLOAD_REDIRECTED);
 		redirect=u;
 	}
 	
@@ -76,5 +79,13 @@ public class DownloadEvent
 	public DownloadQueue getQueue()
 	{
 		return queue;
+	}
+	
+	/**
+	 * @return Returns the localFile.
+	 */
+	public File getLocalFile()
+	{
+		return localFile;
 	}
 }

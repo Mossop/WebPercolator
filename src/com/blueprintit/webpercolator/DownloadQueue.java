@@ -1,8 +1,9 @@
 package com.blueprintit.webpercolator;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -187,11 +188,14 @@ public class DownloadQueue
 	
 	public synchronized void add(Download r)
 	{
-		if (!(cache.containsValue(r)||cache.containsKey(r.getLocalFile())))
+		if (!cache.containsValue(r))
 		{
-			cache.put(r.getLocalFile(),r);
-			queue.add(r);
-			checkWaiting();
+			if ((r.getLocalFile()==null)||(!cache.containsKey(r.getLocalFile())))
+			{
+				cache.put(r.getLocalFile(),r);
+				queue.add(r);
+				checkWaiting();
+			}
 		}
 	}
 	
@@ -207,15 +211,5 @@ public class DownloadQueue
 			{
 			}
 		}
-	}
-	
-	public static void main(String[] args) throws MalformedURLException
-	{
-		DownloadQueue queue = new DownloadQueue();
-		Download down = new GetDownload("http://www.blueprintit.co.uk",new File("c:\\test.html"));
-		queue.add(down);
-		queue.start();
-		queue.waitFor();
-		System.out.println("Complete");
 	}
 }

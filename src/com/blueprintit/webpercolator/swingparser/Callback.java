@@ -3,7 +3,7 @@ package com.blueprintit.webpercolator.swingparser;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.Map;
 
 import javax.swing.text.MutableAttributeSet;
@@ -27,16 +27,24 @@ public class Callback extends ParserCallback
 	{
 		this.base=base;
 		tagattrs = new HashMap();
-		links = new LinkedList();
+		links = new HashSet();
 		taglinktypes = new HashMap();
-		tagattrs.put(HTML.Tag.A,HTML.Attribute.HREF);
-		taglinktypes.put(HTML.Tag.A,new Integer(Download.LINK_DOWNLOAD));
-		tagattrs.put(HTML.Tag.IMG,HTML.Attribute.SRC);
-		taglinktypes.put(HTML.Tag.IMG,new Integer(Download.IMAGE_DOWNLOAD));
-		tagattrs.put(HTML.Tag.FRAME,HTML.Attribute.SRC);
-		taglinktypes.put(HTML.Tag.FRAME,new Integer(Download.FRAME_DOWNLOAD));
-		tagattrs.put(HTML.Tag.LINK,HTML.Attribute.HREF);
-		taglinktypes.put(HTML.Tag.LINK,new Integer(Download.UNSPECIFIED_DOWNLOAD));
+		specifyLinkType(HTML.Tag.A,     HTML.Attribute.HREF, Download.LINK_DOWNLOAD);
+		specifyLinkType(HTML.Tag.IMG,   HTML.Attribute.SRC,  Download.IMAGE_DOWNLOAD);
+		specifyLinkType(HTML.Tag.FRAME, HTML.Attribute.SRC,  Download.FRAME_DOWNLOAD);
+		specifyLinkType(HTML.Tag.LINK,  HTML.Attribute.HREF, Download.UNSPECIFIED_DOWNLOAD);
+		specifyLinkType(HTML.Tag.INPUT, HTML.Attribute.SRC,  Download.IMAGE_DOWNLOAD);
+	}
+	
+	public void specifyLinkType(HTML.Tag tag, HTML.Attribute attr, int type)
+	{
+		tagattrs.put(tag,attr);
+		taglinktypes.put(tag,new Integer(type));
+	}
+	
+	public void handleSimpleTag(HTML.Tag tag, MutableAttributeSet attr, int pos)
+	{
+		handleStartTag(tag,attr,pos);
 	}
 	
 	public void handleStartTag(HTML.Tag tag, MutableAttributeSet attr, int pos)
@@ -61,9 +69,15 @@ public class Callback extends ParserCallback
 				try
 				{
 					String value = (String)attr.getAttribute(tagattrs.get(tag));
-					URL newurl = new URL(base,value);
-					links.add(new Link(newurl,((Integer)taglinktypes.get(tag)).intValue()));
-					System.out.println("Found a link to "+newurl.toString());
+					if (value!=null)
+					{
+						URL newurl = new URL(base,value);
+						Link newlink = new Link(newurl,((Integer)taglinktypes.get(tag)).intValue());
+						if (!links.contains(newlink))
+						{
+							links.add(newlink);
+						}
+					}
 				}
 				catch (Exception e)
 				{
@@ -74,7 +88,7 @@ public class Callback extends ParserCallback
 	}
 
 	/**
-	 * @return
+	 * @return Returns the links retrieved
 	 */
 	public Collection getLinks()
 	{
