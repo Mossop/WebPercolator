@@ -78,7 +78,7 @@ public class JGet implements DownloadListener
 		text=text.replaceAll("\\*",".*");
 		text=text.replaceAll("\\?",".");
 		//System.out.println("Generated regex "+text);
-		return "^"+text+"$";
+		return text;
 	}
 	
 	public boolean rejected(String text, Collection accept, Collection reject)
@@ -158,14 +158,17 @@ public class JGet implements DownloadListener
 		}
 		if (rejected(host,accepthosts,rejecthosts))
 		{
+			//System.out.println("Ignoring "+host);
 			return false;
 		}
 		if (rejected(file,acceptfiles,rejectfiles))
 		{
+			//System.out.println("Ignoring "+file);
 			return false;
 		}
 		if (rejected(path,acceptdirs,rejectdirs))
 		{
+			//System.out.println("Ignoring "+path);
 			return false;
 		}
 
@@ -516,11 +519,7 @@ public class JGet implements DownloadListener
 						{
 							if (parts[partloop].length()>0)
 							{
-								if (!parts[partloop].startsWith("*"))
-								{
-									parts[partloop]="*"+parts[partloop];
-								}
-								acceptfiles.add(escapeRegex(parts[partloop]));
+								acceptfiles.add(escapeRegex(parts[partloop])+"$");
 							}
 						}
 					}
@@ -536,11 +535,7 @@ public class JGet implements DownloadListener
 						{
 							if (parts[partloop].length()>0)
 							{
-								if (!parts[partloop].startsWith("*"))
-								{
-									parts[partloop]="*"+parts[partloop];
-								}
-								rejectfiles.add(escapeRegex(parts[partloop]));
+								rejectfiles.add(escapeRegex(parts[partloop])+"$");
 							}
 						}
 					}

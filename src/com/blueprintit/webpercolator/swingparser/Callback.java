@@ -55,8 +55,11 @@ public class Callback extends ParserCallback
 			try
 			{
 				String baseref = (String)attr.getAttribute(HTML.Attribute.HREF);
-				URL newbase = new URL(baseref);
-				base=newbase;
+				if (baseref!=null)
+				{
+					URL newbase = new URL(baseref);
+					base=newbase;
+				}
 			}
 			catch (Exception e)
 			{
