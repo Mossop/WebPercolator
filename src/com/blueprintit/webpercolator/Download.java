@@ -1,6 +1,7 @@
 package com.blueprintit.webpercolator;
 
 import java.io.File;
+import java.net.URL;
 
 import org.apache.commons.httpclient.HttpMethod;
 
@@ -17,6 +18,8 @@ public interface Download
 	public static final int APPLET_DOWNLOAD = 5;
 	
 	public HttpMethod getHttpMethod();
+	
+	public URL getURL();
 	
 	public File getLocalFile();
 	

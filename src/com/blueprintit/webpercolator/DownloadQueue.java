@@ -1,8 +1,5 @@
 package com.blueprintit.webpercolator;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,10 +26,10 @@ public class DownloadQueue
 	private Map cache;
 	private boolean abort;
 	private boolean running;
-	private int maxdownloads;
 	private HttpClient agent;
 	private List listeners;
 	private HtmlLinkParser parser;
+	private MultiThreadedHttpConnectionManager manager;
 	
 	public DownloadQueue()
 	{
@@ -41,9 +38,10 @@ public class DownloadQueue
 		cache = Collections.synchronizedMap(new HashMap());
 		listeners = new LinkedList();
 		running=false;
-		MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
+		manager = new MultiThreadedHttpConnectionManager();
 		agent = new HttpClient(manager);
-		maxdownloads=10;
+		manager.setMaxTotalConnections(10);
+		manager.setMaxConnectionsPerHost(10);
 		parser = new Parser();
 	}
 	
@@ -167,35 +165,36 @@ public class DownloadQueue
 	
 	public synchronized void setMaxDownloads(int value)
 	{
-		maxdownloads=value;
+		manager.setMaxConnectionsPerHost(value);
+		manager.setMaxTotalConnections(value);
 		checkWaiting();
 	}
 	
 	private synchronized void checkWaiting()
 	{
-		while ((!abort)&&(inprogress.size()<maxdownloads)&&(queue.size()>0))
+		if (running)
 		{
-			Download r = (Download)queue.remove(0);
-			Downloader d = new Downloader(this,r);
-			inprogress.put(r,d);
-			d.start();
-		}
-		if (inprogress.size()==0)
-		{
-			running=false;
+			while ((!abort)&&(inprogress.size()<manager.getMaxTotalConnections())&&(queue.size()>0))
+			{
+				Download r = (Download)queue.remove(0);
+				Downloader d = new Downloader(this,r);
+				inprogress.put(r,d);
+				d.start();
+			}
+			if (inprogress.size()==0)
+			{
+				running=false;
+			}
 		}
 	}
 	
 	public synchronized void add(Download r)
 	{
-		if (!cache.containsValue(r))
+		if ((r.getLocalFile()==null)||(!cache.containsKey(r.getLocalFile())))
 		{
-			if ((r.getLocalFile()==null)||(!cache.containsKey(r.getLocalFile())))
-			{
-				cache.put(r.getLocalFile(),r);
-				queue.add(r);
-				checkWaiting();
-			}
+			cache.put(r.getLocalFile(),r);
+			queue.add(r);
+			checkWaiting();
 		}
 	}
 	
