@@ -31,7 +31,7 @@ public abstract class AbstractCondition implements Condition
 
 	public abstract void parseCondition(Element element) throws ConfigurationParseException;
 	
-	public final void parse(Element element) throws ConfigurationParseException
+	public final void parseConfig(Element element) throws ConfigurationParseException
 	{
 		if (element.hasAttribute("invert"))
 		{

@@ -7,16 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import com.blueprintit.webfetch.*;
 import com.blueprintit.webfetch.ConfigurationParseException;
 
 /**
  * @author Dave
  */
-public class ConditionSet implements Condition
+public class ConditionSet extends ElementConfigParser implements Condition
 {
 	private static Map conditionmap;
 	private List conditions;
@@ -44,7 +41,7 @@ public class ConditionSet implements Condition
 	public ConditionSet(Element element) throws ConfigurationParseException
 	{
 		this();
-		parse(element);
+		parseConfig(element);
 	}
 
 	public static Condition createCondition(String type)
@@ -68,7 +65,7 @@ public class ConditionSet implements Condition
 		}
 	}
 	
-	protected boolean parsePossibleCondition(Element element) throws ConfigurationParseException
+	protected boolean parseSubElement(Element element) throws ConfigurationParseException
 	{
 		Condition condition = createCondition(element.getNodeName());
 		if (condition!=null)
@@ -76,13 +73,10 @@ public class ConditionSet implements Condition
 			conditions.add(condition);
 			return true;
 		}
-		else
-		{
-			return false;
-		}
+		return false;
 	}
 	
-	public void parse(Element element) throws ConfigurationParseException
+	public void parseConfig(Element element) throws ConfigurationParseException
 	{
 		if (element.getNodeName().equals("Conditions"))
 		{
@@ -119,17 +113,7 @@ public class ConditionSet implements Condition
 		{
 			assert false;
 		}
-		NodeList nodes = element.getChildNodes();
-		for (int loop=0; loop<nodes.getLength(); loop++)
-		{
-			if (nodes.item(loop).getNodeType()==Node.ELEMENT_NODE)
-			{
-				if (!parsePossibleCondition((Element)nodes.item(loop)))
-				{
-					throw new ConfigurationParseException("Unknown element in configuration: "+element.getNodeName());
-				}
-			}
-		}
+		super.parseConfig(element);
 	}
 
 	public boolean matches(Environment env)

@@ -7,16 +7,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import com.blueprintit.webfetch.ConfigurationParseException;
 import com.blueprintit.webfetch.Environment;
 
 /**
  * @author Dave
  */
-class ConfigurationSet extends ConditionSet
+public class ConfigurationSet extends ConditionSet
 {
 	private List configsets;
 	private ConfigurationSet parent;
@@ -88,28 +85,20 @@ class ConfigurationSet extends ConditionSet
 		return (String)obj;
 	}
 		
-	protected void parseConfig(Element element) throws ConfigurationParseException
+	protected boolean parseSubElement(Element element) throws ConfigurationParseException
 	{
-		NodeList nodes = element.getChildNodes();
-		for (int loop=0; loop<nodes.getLength(); loop++)
+		if (element.getNodeName().equals("Subset"))
 		{
-			Node node = nodes.item(loop);
-			if (node.getNodeType()==Node.ELEMENT_NODE)
-			{
-				Element el = (Element)node;
-				if (el.getNodeName().equals("Subset"))
-				{
-					configsets.add(new ConfigurationSet(el));
-				}
-				else
-				{
-					if (!parsePossibleCondition(el))
-					{
-						throw new ConfigurationParseException("Unknown element in configuration: "+element.getNodeName());
-					}
-				}
-			}
+			configsets.add(new ConfigurationSet(element));
+			return true;
 		}
+		if (element.getNodeName().equals("Table"))
+		{
+			Table table = new Table(element);
+			tables.put(table.getName(),table);
+			return true;
+		}
+		return super.parseSubElement(element);
 	}
 	
 	private void doApplyConfiguration(Environment env)
@@ -132,7 +121,7 @@ class ConfigurationSet extends ConditionSet
 		doApplyConfiguration(env);
 	}
 	
-	Table findTable(String name)
+	public Table findTable(String name)
 	{
 		if (tables.containsKey(name))
 		{

@@ -24,7 +24,7 @@ public class URLBuilder
 	private static final String NUMBEREDHOST_REGEX = "\\d{1,3}(?:\\.\\d{1,3}){3}";
 	
 	private static final String HOST_REGEX = NUMBEREDHOST_REGEX+"|"+NAMEDHOST_REGEX;
-	private static final String SCHEME_REGEX = "http|ftp|https|ftps";
+	private static final String SCHEME_REGEX = "http|https"; // Not using ftp: +"ftp";
 	private static final String PATH_REGEX = "(?:/(?:"+XALPHA_REGEX+"|\\.)*)*";
 	private static final String QUERY_REGEX = "(?:"+XALPHA_REGEX+")*";
 	private static final String FRAGMENT_REGEX = "(?:"+XALPHA_REGEX+")*";
