@@ -122,7 +122,7 @@ public class Environment
 	
 	public String getValue(String key)
 	{
-		Object result = getValue(key.split("."),0,-1,this);
+		Object result = getValue(key.split("\\."),0,-1,this);
 		if (result==null)
 		{
 			System.err.println("Property "+key+" could not be found.");
@@ -156,7 +156,7 @@ public class Environment
 	
 	public void setValue(String key, String value)
 	{
-		String[] args = key.split(".");
+		String[] args = key.split("\\.");
 		Object object = getValue(args,0,args.length-1,this);
 		if (object!=null)
 		{
