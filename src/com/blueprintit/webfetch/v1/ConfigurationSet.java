@@ -128,7 +128,7 @@ public class ConfigurationSet extends ConditionSet
 			if (config.matches(env))
 			{
 				config.applyConfigurationSet(env);
-				if (env.getRejected()||env.getAccepted())
+				if (env.isDecided())
 					return;
 			}
 		}

@@ -43,7 +43,7 @@ public class Table extends ElementConfigParser implements Action
 				break;
 			}
 			row.execute(config,env);
-			if ((env.getAccepted())||(env.getRejected()))
+			if (env.isDecided())
 			{
 				break;
 			}

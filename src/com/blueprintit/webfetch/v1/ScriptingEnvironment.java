@@ -6,9 +6,9 @@
  */
 package com.blueprintit.webfetch.v1;
 
-import java.lang.reflect.Constructor;
+/*import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.HashMap;
+import java.util.HashMap;*/
 import java.util.Map;
 
 import org.mozilla.javascript.Context;
@@ -16,7 +16,6 @@ import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.Scriptable;
 
 import com.blueprintit.webfetch.Environment;
-import com.blueprintit.webfetch.URLBuilder;
 
 /**
  * @author Dave
@@ -27,6 +26,7 @@ public class ScriptingEnvironment
 	private Map custom;
 	private Context jsContext;
 	private Scriptable jsScope;
+	private DownloadSettings settings;
 	
 	/**
 	 * @param env
@@ -34,10 +34,21 @@ public class ScriptingEnvironment
 	public ScriptingEnvironment(Environment env)
 	{
 		this.env=env;
+		settings = new DownloadSettings(env);
 		jsContext = Context.enter();
 		jsScope = jsContext.initStandardObjects();
-		Scriptable target = jsContext.toObject(new URLBuilder(env.getTarget()),jsScope);
-		jsScope.put("target",jsScope,target);
+		Scriptable target = jsContext.toObject(settings,jsScope);
+		jsScope.put("download",jsScope,target);
+	}
+	
+	public boolean isDecided()
+	{
+		return settings.isAccepted()||settings.isRejected();
+	}
+	
+	public DownloadSettings getDownloadSettings()
+	{
+		return settings;
 	}
 	
 	public String evaluate(String script)
@@ -57,29 +68,10 @@ public class ScriptingEnvironment
 	public void exit()
 	{
 		jsContext.exit();
+		settings.store(env);
 	}
-	
-	public boolean getAccepted()
-	{
-		return env.getAccepted();
-	}
-	
-	public void setAccepted(boolean value)
-	{
-		env.setAccepted(value);
-	}
-	
-	public boolean getRejected()
-	{
-		return env.getRejected();
-	}
-	
-	public void setRejected(boolean value)
-	{
-		env.setRejected(value);
-	}
-	
-	public Map getCustom()
+
+	/*public Map getCustom()
 	{
 		if (custom==null)
 		{
@@ -206,5 +198,5 @@ public class ScriptingEnvironment
 		{
 			System.err.println("Property "+key+" could not be found.");
 		}
-	}
+	}*/
 }

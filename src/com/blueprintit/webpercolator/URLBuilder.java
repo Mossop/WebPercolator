@@ -4,7 +4,7 @@
  * $Date$
  * $Revision$
  */
-package com.blueprintit.webfetch;
+package com.blueprintit.webpercolator;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
  */
 public class URLBuilder
 {
+	private String url;
 	private String scheme = "http";
 	private String host = "localhost";
 	private String path = "/";
@@ -39,6 +40,16 @@ public class URLBuilder
 	
 	public URLBuilder(String url) throws MalformedURLException
 	{
+		setURL(url);
+	}
+	
+	public URLBuilder(URL url)
+	{
+		setURL(url);
+	}
+	
+	public void setURL(String url) throws MalformedURLException
+	{
 		Pattern urlsplit = Pattern.compile("^"+URL_REGEX+"$");
 		Matcher matcher = urlsplit.matcher(url);
 		if (matcher.matches())
@@ -58,7 +69,7 @@ public class URLBuilder
 		}
 	}
 	
-	public URLBuilder(URL url)
+	public void setURL(URL url)
 	{
 		scheme=url.getProtocol();
 		port=url.getPort();

@@ -24,6 +24,6 @@ public class RejectAction implements Action
 
 	public void execute(ConfigurationSet config, ScriptingEnvironment env)
 	{
-		env.setRejected(true);
+		env.getDownloadSettings().reject();
 	}
 }

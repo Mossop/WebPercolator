@@ -24,6 +24,6 @@ public class AcceptAction implements Action
 
 	public void execute(ConfigurationSet config, ScriptingEnvironment env)
 	{
-		env.setAccepted(true);
+		env.getDownloadSettings().accept();
 	}
 }
