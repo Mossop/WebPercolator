@@ -78,8 +78,15 @@ public class WebFetch
 		queue.addDownloadListener(new DownloadAdapter() {
 			public void downloadComplete(DownloadEvent e)
 			{
-				System.out.println(e.getDownload().getURL()+" downloaded to "+e.getLocalFile());
 				EnvironmentDownload download = (EnvironmentDownload)e.getDownload();
+				if (download.getLocalFile()!=null)
+				{
+					System.out.println(e.getDownload().getURL()+" downloaded to "+e.getLocalFile());
+				}
+				else
+				{
+					System.out.println(e.getDownload().getURL()+" downloaded");
+				}
 				boolean parse = false;
 				if (download.getLocalFile()==null)
 				{
@@ -125,11 +132,11 @@ public class WebFetch
 				{
 					if (e.getException()==null)
 					{
-						System.err.println("Failed to download "+e.getDownload().getURL()+": "+e.getDownload().getHttpMethod().getStatusLine());
+						System.err.println(e.getDownload().getURL()+": "+e.getDownload().getHttpMethod().getStatusLine());
 					}
 					else
 					{
-						System.err.println("Failed to download "+e.getDownload().getURL()+": "+e.getException().getMessage());
+						System.err.println(e.getDownload().getURL()+": "+e.getException().getMessage());
 					}
 				}
 			}
