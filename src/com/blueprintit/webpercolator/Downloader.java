@@ -39,13 +39,12 @@ public class Downloader implements Runnable
 		}
 	}
 	
-	/* (non-Javadoc)
+	/**
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run()
 	{
-		DownloadEvent ev = new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_STARTED);
-		queue.processDownloadEvent(ev);
+		queue.processDownloadEvent(new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_STARTED));
 		try
 		{
 			OutputStream out = new FileOutputStream(download.getLocalFile());
@@ -65,29 +64,25 @@ public class Downloader implements Runnable
 				out.close();
 				in.close();
 				method.releaseConnection();
-				ev = new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_COMPLETE);
-				queue.processDownloadEvent(ev);
+				queue.processDownloadEvent(new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_COMPLETE));
 			}
 			catch (HttpException e)
 			{
 				method.releaseConnection();
 				out.close();
-				ev = new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_FAILED);
-				queue.processDownloadEvent(ev);
+				queue.processDownloadEvent(new DownloadEvent(queue,this,download,e));
 			}
 			catch (IOException e)
 			{
 				method.releaseConnection();
 				out.close();
-				ev = new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_FAILED);
-				queue.processDownloadEvent(ev);
+				queue.processDownloadEvent(new DownloadEvent(queue,this,download,e));
 			}
 		}
 		catch (IOException e) // Thrown when the file could not be opened for writing.
 		{
-			ev = new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_FAILED);
-			queue.processDownloadEvent(ev);
+			queue.processDownloadEvent(new DownloadEvent(queue,this,download,e));
 		}
+		running=false;
 	}
-
 }

@@ -9,6 +9,7 @@ public class DownloadEvent
 	private Downloader downloader;
 	private Download download;
 	private int type;
+	private Exception exception;
 	
 	public static final int DOWNLOAD_STARTED = 0;
 	public static final int DOWNLOAD_UPDATE = 1;
@@ -21,6 +22,20 @@ public class DownloadEvent
 		downloader=d;
 		download=r;
 		this.type=type;
+	}
+	
+	public DownloadEvent(DownloadQueue q, Downloader d, Download r, Exception e)
+	{
+		this(q,d,r,DOWNLOAD_FAILED);
+		exception=e;
+	}
+	
+	/**
+	 * @return Returns the exception generated.
+	 */
+	public Exception getException()
+	{
+		return exception;
 	}
 	
 	/**
