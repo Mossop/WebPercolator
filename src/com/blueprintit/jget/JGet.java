@@ -442,14 +442,14 @@ public class JGet implements DownloadListener
 
 		options.addOption("p","page-requisites",false,"Retrieve any media included in a page, like images and stylesheets");
 
-		options.addOption(OptionBuilder.withLongOpt("accept").hasArg().withArgName("acclist").withDescription("Comma-separated list of file name suffixes to accept").create("A"));
-		options.addOption(OptionBuilder.withLongOpt("reject").hasArg().withArgName("rejlist").withDescription("Comma-separated list of file name suffixes to reject").create("R"));
+		options.addOption(OptionBuilder.withLongOpt("accept-files").hasArg().withArgName("list").withDescription("Comma-separated list of file name regular expressions to accept").create("Af"));
+		options.addOption(OptionBuilder.withLongOpt("reject-files").hasArg().withArgName("list").withDescription("Comma-separated list of file name regular expressions to reject").create("Rf"));
 
-		options.addOption(OptionBuilder.withLongOpt("include-directories").hasArg().withArgName("list").withDescription("Comma-separated list of directory names to accept").create("I"));
-		options.addOption(OptionBuilder.withLongOpt("exclude-directories").hasArg().withArgName("list").withDescription("Comma-separated list of directory names to reject").create("X"));
+		options.addOption(OptionBuilder.withLongOpt("accept-directories").hasArg().withArgName("list").withDescription("Comma-separated list of directory name regular expressions to accept").create("Ap"));
+		options.addOption(OptionBuilder.withLongOpt("reject-directories").hasArg().withArgName("list").withDescription("Comma-separated list of directory name regular expressions to reject").create("Rp"));
 
-		options.addOption(OptionBuilder.withLongOpt("domains").hasArg().withArgName("domain-list").withDescription("Comma-separated list of domains to accept").create("D"));
-		options.addOption(OptionBuilder.withLongOpt("exclude-domains").hasArg().withArgName("domain-list").withDescription("Comma-separated list of domains to reject").create());
+		options.addOption(OptionBuilder.withLongOpt("accept-domains").hasArg().withArgName("list").withDescription("Comma-separated list of domain regular expressions to accept").create("Ad"));
+		options.addOption(OptionBuilder.withLongOpt("reject-domains").hasArg().withArgName("list").withDescription("Comma-separated list of domain regular expressions to reject").create("Rd"));
 
 		options.addOption("H","span-hosts",false,"Allow recursive retrieval to span hosts");
 		options.addOption("np","no-parent",false,"Do not ascend above the parent directory of the initial resource");
@@ -517,9 +517,9 @@ public class JGet implements DownloadListener
 					}
 				}
 				
-				if (commandline.hasOption("A"))
+				if (commandline.hasOption("Af"))
 				{
-					String[] list = commandline.getOptionValues("A");
+					String[] list = commandline.getOptionValues("Af");
 					for (int loop=0; loop<list.length; loop++)
 					{
 						String[] parts = list[loop].split(",");
@@ -534,9 +534,9 @@ public class JGet implements DownloadListener
 					}
 				}
 				
-				if (commandline.hasOption("R"))
+				if (commandline.hasOption("Rf"))
 				{
-					String[] list = commandline.getOptionValues("R");
+					String[] list = commandline.getOptionValues("Rf");
 					for (int loop=0; loop<list.length; loop++)
 					{
 						String[] parts = list[loop].split(",");
@@ -551,9 +551,9 @@ public class JGet implements DownloadListener
 					}
 				}
 				
-				if (commandline.hasOption("I"))
+				if (commandline.hasOption("Ap"))
 				{
-					String[] list = commandline.getOptionValues("I");
+					String[] list = commandline.getOptionValues("Ap");
 					for (int loop=0; loop<list.length; loop++)
 					{
 						String[] parts = list[loop].split(",");
@@ -568,9 +568,9 @@ public class JGet implements DownloadListener
 					}
 				}
 				
-				if (commandline.hasOption("X"))
+				if (commandline.hasOption("Rp"))
 				{
-					String[] list = commandline.getOptionValues("X");
+					String[] list = commandline.getOptionValues("Rp");
 					for (int loop=0; loop<list.length; loop++)
 					{
 						String[] parts = list[loop].split(",");
@@ -585,9 +585,9 @@ public class JGet implements DownloadListener
 					}
 				}
 				
-				if (commandline.hasOption("D"))
+				if (commandline.hasOption("Ad"))
 				{
-					String[] list = commandline.getOptionValues("D");
+					String[] list = commandline.getOptionValues("Ad");
 					for (int loop=0; loop<list.length; loop++)
 					{
 						String[] parts = list[loop].split(",");
@@ -601,9 +601,9 @@ public class JGet implements DownloadListener
 					}
 				}
 				
-				if (commandline.hasOption("exclude-domains"))
+				if (commandline.hasOption("Rd"))
 				{
-					String[] list = commandline.getOptionValues("exclude-domains");
+					String[] list = commandline.getOptionValues("Rd");
 					for (int loop=0; loop<list.length; loop++)
 					{
 						String[] parts = list[loop].split(",");
