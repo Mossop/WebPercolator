@@ -12,8 +12,8 @@ import java.util.Map;
  */
 public class Environment
 {
-	private URL target;
-	private URL referer;
+	private URLBuilder target;
+	private URLBuilder referer;
 	private File file = null;
 	private boolean accepted = false;
 	private boolean rejected = false;
@@ -21,13 +21,13 @@ public class Environment
 	
 	public Environment(URL target)
 	{
-		this.target=target;
+		this.target=new URLBuilder(target);
 	}
 	
 	public Environment(URL target, URL referer)
 	{
-		this.target=target;
-		this.referer=referer;
+		this.target=new URLBuilder(target);
+		this.referer=new URLBuilder(referer);
 	}
 
 	public Map getCustom()
@@ -39,22 +39,22 @@ public class Environment
 		return custom;
 	}
 	
-	public URL getReferer()
+	public URLBuilder getReferer()
 	{
 		return referer;
 	}
 	
-	public void setReferer(URL referer)
+	public void setReferer(URLBuilder referer)
 	{
 		this.referer = referer;
 	}
 	
-	public URL getTarget()
+	public URLBuilder getTarget()
 	{
 		return target;
 	}
 	
-	public void setTarget(URL target)
+	public void setTarget(URLBuilder target)
 	{
 		this.target = target;
 	}

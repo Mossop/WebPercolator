@@ -68,16 +68,17 @@ public class ConditionSet implements Condition
 		}
 	}
 	
-	protected void parsePossibleCondition(Element element) throws ConfigurationParseException
+	protected boolean parsePossibleCondition(Element element) throws ConfigurationParseException
 	{
 		Condition condition = createCondition(element.getNodeName());
 		if (condition!=null)
 		{
 			conditions.add(condition);
+			return true;
 		}
 		else
 		{
-			throw new ConfigurationParseException("Unknown element in configuration: "+element.getNodeName());
+			return false;
 		}
 	}
 	
@@ -123,7 +124,10 @@ public class ConditionSet implements Condition
 		{
 			if (nodes.item(loop).getNodeType()==Node.ELEMENT_NODE)
 			{
-				parsePossibleCondition((Element)nodes.item(loop));
+				if (!parsePossibleCondition((Element)nodes.item(loop)))
+				{
+					throw new ConfigurationParseException("Unknown element in configuration: "+element.getNodeName());
+				}
 			}
 		}
 	}

@@ -55,7 +55,7 @@ public class EnvironmentDownload implements Download
 
 	public URL getURL()
 	{
-		return environment.getTarget();
+		return environment.getTarget().toURL();
 	}
 
 	public File getLocalFile()

@@ -10,8 +10,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.blueprintit.webfetch.*;
 import com.blueprintit.webfetch.ConfigurationParseException;
+import com.blueprintit.webfetch.Environment;
 
 /**
  * @author Dave
@@ -103,7 +103,10 @@ class ConfigurationSet extends ConditionSet
 				}
 				else
 				{
-					parsePossibleCondition(el);
+					if (!parsePossibleCondition(el))
+					{
+						throw new ConfigurationParseException("Unknown element in configuration: "+element.getNodeName());
+					}
 				}
 			}
 		}
