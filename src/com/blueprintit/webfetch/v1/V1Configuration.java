@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.w3c.dom.Element;
@@ -22,6 +23,7 @@ import org.w3c.dom.NodeList;
 import com.blueprintit.webfetch.Configuration;
 import com.blueprintit.webfetch.ConfigurationParseException;
 import com.blueprintit.webfetch.Environment;
+import com.blueprintit.webpercolator.URLBuilder;
 
 /**
  * @author Dave
@@ -30,12 +32,14 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 {
 	private List urls;
 	private List authdetails;
+	private List cookies;
 	
 	public V1Configuration(File base, Element element) throws ConfigurationParseException
 	{
 		super();
 		setCascadingSetting("basedir",base);
 		urls = new ArrayList();
+		cookies = new ArrayList();
 		authdetails = new ArrayList();
 		parseConfig(element);
 	}
@@ -94,6 +98,47 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 			authdetails.add(details);
 			return true;
 		}
+		if (element.getNodeName().equals("Cookie"))
+		{
+			Cookie cookie = new Cookie();
+			if (element.hasAttribute("url"))
+			{
+				URLBuilder url;
+				try
+				{
+					url = new URLBuilder(element.getAttribute("url"));
+				}
+				catch (MalformedURLException e)
+				{
+					throw new ConfigurationParseException("Invalid url specified for cookie");
+				}
+				cookie.setDomain(url.getHost());
+				if (url.getPath().length()>1)
+				{
+					cookie.setPath(url.getPath());
+				}
+				NodeList list = element.getElementsByTagName("Name");
+				if (list.getLength()==1)
+				{
+					cookie.setName(getElementText((Element)list.item(0)));
+				}
+				else
+				{
+					throw new ConfigurationParseException("Cookie must contain a Name");
+				}
+				list = element.getElementsByTagName("Value");
+				if (list.getLength()==1)
+				{
+					cookie.setValue(getElementText((Element)list.item(0)));
+				}
+				else
+				{
+					throw new ConfigurationParseException("Cookie must contain a Value");
+				}
+				cookies.add(cookie);
+				return true;
+			}
+		}
 		return super.parseSubElement(element);
 	}
 	
@@ -104,6 +149,13 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 		{
 			AuthenticationDetails details = (AuthenticationDetails)loop.next();
 			state.setCredentials(details.getRealm(),details.getHost(),details.getCredentials());
+		}
+		
+		loop = cookies.iterator();
+		while (loop.hasNext())
+		{
+			Cookie cookie = (Cookie)loop.next();
+			state.addCookie(cookie);
 		}
 	}
 	
