@@ -111,7 +111,6 @@ public class WebFetch
 
 			public void downloadFailed(DownloadEvent e)
 			{
-				// TODO add checking for valid HTTP errors that should not be repeated
 				boolean retryable=true;
 				if (e.getException()==null)
 				{

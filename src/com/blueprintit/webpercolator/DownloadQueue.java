@@ -41,6 +41,9 @@ public class DownloadQueue
 	private Comparator ordering;
 	private boolean cancompare;
 	private MultiThreadedHttpConnectionManager manager;
+	private boolean globalProxySet = false;
+	private String globalProxyHost;
+	private int globalProxyPort;
 	
 	public DownloadQueue()
 	{
@@ -58,9 +61,30 @@ public class DownloadQueue
 		ordering = null;
 	}
 	
+	public synchronized void setGlobalProxy(String host, int port)
+	{
+		globalProxyHost=host;
+		globalProxyPort=port;
+		globalProxySet=true;
+	}
+	
+	public synchronized void clearGlobalProxy()
+	{
+		globalProxySet=false;
+	}
+	
+	public synchronized boolean isGlobalProxySet()
+	{
+		return globalProxySet;
+	}
+	
 	public HeadMethod getURLDetails(URL url) throws HttpException, IOException
 	{
 		HeadMethod method = new HeadMethod(url.toString());
+		if (globalProxySet)
+		{
+			method.getHostConfiguration().setProxy(globalProxyHost,globalProxyPort);
+		}
 		agent.executeMethod(method);
 		method.releaseConnection();
 		return method;
@@ -318,6 +342,10 @@ public class DownloadQueue
 		if (!(r instanceof Comparable))
 		{
 			cancompare=false;
+		}
+		if ((globalProxySet)&&(!r.getHttpMethod().getHostConfiguration().isProxySet()))
+		{
+			r.getHttpMethod().getHostConfiguration().setProxy(globalProxyHost,globalProxyPort);
 		}
 		int pos = queue.size();
 		if ((ordering!=null)||(cancompare))
