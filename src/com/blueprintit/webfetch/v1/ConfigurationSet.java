@@ -85,9 +85,19 @@ public class ConfigurationSet extends Block
 		return null;
 	}
 	
+	private boolean isCascadedSet(String name)
+	{
+		return settings.containsKey(name)||((parent!=null)&&(parent.isCascadedSet(name)));
+	}
+	
+	private boolean isLocalSet(String name)
+	{
+		return localsettings.containsKey(name);
+	}
+	
 	private boolean isSet(String name)
 	{
-		return getSetting(name)!=null;
+		return isLocalSet(name)||isCascadedSet(name);
 	}
 	
 	private void setLocalSetting(String name, boolean value)

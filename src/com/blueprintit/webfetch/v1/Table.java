@@ -20,7 +20,7 @@ public class Table extends ElementConfigParser implements Action
 {
 	private boolean newScope;
 	private List rows;
-	private String name = "";
+	private String name = null;
 	
 	public Table()
 	{

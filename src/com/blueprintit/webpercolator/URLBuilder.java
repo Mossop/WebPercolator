@@ -40,15 +40,20 @@ public class URLBuilder
 	
 	public URLBuilder(String url) throws MalformedURLException
 	{
-		setURL(url);
+		setUrl(url);
 	}
 	
 	public URLBuilder(URL url)
 	{
-		setURL(url);
+		setUrl(url);
 	}
 	
-	public void setURL(String url) throws MalformedURLException
+	public String getUrl()
+	{
+		return toString();
+	}
+	
+	public void setUrl(String url) throws MalformedURLException
 	{
 		Pattern urlsplit = Pattern.compile("^"+URL_REGEX+"$");
 		Matcher matcher = urlsplit.matcher(url);
@@ -69,7 +74,7 @@ public class URLBuilder
 		}
 	}
 	
-	public void setURL(URL url)
+	public void setUrl(URL url)
 	{
 		scheme=url.getProtocol();
 		port=url.getPort();

@@ -65,6 +65,11 @@ public class DownloadQueue
 		return method;
 	}
 	
+	public synchronized int getRemaining()
+	{
+		return inprogress.size()+queue.size();
+	}
+	
 	public HtmlLinkParser getLinkParser()
 	{
 		return parser;
