@@ -68,6 +68,8 @@ public class WebFetch
 		this.config=config;
 		queue = new DownloadQueue();
 		
+		//queue.setOrdering(config.getOrdering(queue));
+		
 		queue.addQueueListener(new QueueAdapter() {
 			public void queueComplete(Object sender, QueueEvent e)
 			{

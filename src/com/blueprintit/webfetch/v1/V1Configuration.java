@@ -11,6 +11,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,7 +24,9 @@ import org.w3c.dom.NodeList;
 import com.blueprintit.webfetch.Configuration;
 import com.blueprintit.webfetch.ConfigurationParseException;
 import com.blueprintit.webfetch.Environment;
+import com.blueprintit.webpercolator.DownloadQueue;
 import com.blueprintit.webpercolator.URLBuilder;
+import com.blueprintit.webpercolator.orderings.MediaBasedOrdering;
 
 /**
  * @author Dave
@@ -34,11 +37,13 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 	private List authdetails;
 	private List cookies;
 	private int maxdownloads;
+	private String ordering;
 	
 	public V1Configuration(File base, Element element) throws ConfigurationParseException
 	{
 		super();
 		maxdownloads=5;
+		ordering=null;
 		setCascadingSetting("basedir",base);
 		environments = new ArrayList();
 		cookies = new ArrayList();
@@ -54,6 +59,19 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 	public Collection getEnvironments()
 	{
 		return environments;
+	}
+	
+	public Comparator getOrdering(DownloadQueue queue)
+	{
+		if (ordering==null)
+		{
+			return null;
+		}
+		else if (ordering.equals("image"))
+		{
+			return new MediaBasedOrdering.ImagePriority(queue);
+		}
+		return null;
 	}
 
 	public boolean parseSubElement(Element element) throws ConfigurationParseException
@@ -213,6 +231,17 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 			catch (NumberFormatException e)
 			{
 				throw new ConfigurationParseException("maxDownloads attribute must be a number.",e);
+			}
+		}
+		if (element.hasAttribute("priority"))
+		{
+			if (element.getAttribute("priority").equals("image"))
+			{
+				ordering = "image";
+			}
+			else
+			{
+				throw new ConfigurationParseException("Priority only accepts image as the option");
 			}
 		}
 		super.parseElement(element);

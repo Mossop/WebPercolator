@@ -23,10 +23,22 @@ public class PadAction extends AbstractAction
 	private String source;
 	private String target;
 	private boolean left = true;
+	private boolean numberOnly = true;
 	
 	public void execute(ConfigurationSet config, ScriptingEnvironment env)
 	{
 		String text = env.evaluateAsString(source,type);
+		if (numberOnly)
+		{
+			try
+			{
+				Integer.parseInt(text);
+			}
+			catch (Exception e)
+			{
+				return;
+			}
+		}
 		while (text.length()<length)
 		{
 			if (left)
@@ -85,6 +97,10 @@ public class PadAction extends AbstractAction
 			{
 				throw new ConfigurationParseException("Side must be left or right");
 			}
+		}
+		if (element.hasAttribute("numberOnly"))
+		{
+			numberOnly = Boolean.parseBoolean(element.getAttribute("numberOnly"));
 		}
 		super.parseElement(element);
 	}
