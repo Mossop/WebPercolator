@@ -1,3 +1,9 @@
+/*
+ * $Author$
+ * $RCSfile$
+ * $Date$
+ * $Revision$
+ */
 package com.blueprintit.webfetch;
 
 import org.w3c.dom.Document;

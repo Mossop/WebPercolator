@@ -1,3 +1,9 @@
+/*
+ * $Author$
+ * $RCSfile$
+ * $Date$
+ * $Revision$
+ */
 package com.blueprintit.webfetch;
 
 import java.io.File;
@@ -18,14 +24,6 @@ import org.xml.sax.SAXException;
 import com.blueprintit.webfetch.v1.V1ConfigurationParser;
 import com.blueprintit.webpercolator.DownloadQueue;
 
-/**
- * $Author$
- * $RCSfile$
- * $Date$
- * $Revision$
- *
- * @author Dave
- */
 public class WebFetch
 {
 	private Configuration config;

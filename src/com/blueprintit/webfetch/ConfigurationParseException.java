@@ -1,5 +1,8 @@
 /*
- * Created on 27-Apr-2004
+ * $Author$
+ * $RCSfile$
+ * $Date$
+ * $Revision$
  */
 package com.blueprintit.webfetch;
 

@@ -1,3 +1,9 @@
+/*
+ * $Author$
+ * $RCSfile$
+ * $Date$
+ * $Revision$
+ */
 package com.blueprintit.webfetch.v1.conditions;
 
 import java.util.regex.Pattern;
