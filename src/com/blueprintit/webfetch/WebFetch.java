@@ -198,7 +198,23 @@ public class WebFetch
 	{
 		if (isFinished())
 		{
-			System.out.println("Downloads might be complete");
+			System.out.println("Downloads might be complete. Attempting clean shut down.");
+			synchronized (sleepingParsers)
+			{
+				while (sleepingParsers.size()>0)
+				{
+					ParsingThread parser = (ParsingThread)sleepingParsers.remove(0);
+					parser.stop();
+				}
+			}
+			synchronized (sleepingDeciders)
+			{
+				while (sleepingDeciders.size()>0)
+				{
+					DecisionThread decider = (DecisionThread)sleepingDeciders.remove(0);
+					decider.stop();
+				}
+			}
 		}
 	}
 	
