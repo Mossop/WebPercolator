@@ -42,6 +42,7 @@ public class WebFetch implements DownloadListener
 	{
 		this.config=config;
 		queue = new DownloadQueue();
+		config.initialiseHttpState(queue.getHttpState());
 	}
 	
 	private void parse(URL base, File file)
