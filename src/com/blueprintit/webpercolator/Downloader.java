@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 
@@ -75,9 +76,24 @@ public class Downloader implements Runnable
 					{
 						InputStream in = method.getResponseBodyAsStream();
 						byte[] buffer = new byte[1024];
+						int expected = -1;
+						Header contentlength = method.getResponseHeader("Content-Length");
+						if (contentlength!=null)
+						{
+							try
+							{
+								expected=Integer.parseInt(contentlength.getValue());
+							}
+							catch (NumberFormatException e)
+							{
+								expected=-1;
+							}
+						}
+						int retrieved = 0;
 						int count = in.read(buffer);
 						while (count>=0)
 						{
+							retrieved+=count;
 							if (count>0)
 								out.write(buffer,0,count);
 							count = in.read(buffer);
@@ -85,7 +101,14 @@ public class Downloader implements Runnable
 						out.close();
 						in.close();
 						method.releaseConnection();
-						queue.processDownloadEvent(DownloadEvent.createDownloadEvent(queue,download,target,DownloadEvent.DOWNLOAD_COMPLETE));
+						if ((expected>=0)&&(retrieved<expected))
+						{
+							queue.processDownloadEvent(DownloadEvent.createFailedDownloadEvent(queue,download,target,new IOException("Transfer ended before download was complete.")));
+						}
+						else
+						{
+							queue.processDownloadEvent(DownloadEvent.createDownloadEvent(queue,download,target,DownloadEvent.DOWNLOAD_COMPLETE));
+						}
 					}
 					catch (IOException e)
 					{
