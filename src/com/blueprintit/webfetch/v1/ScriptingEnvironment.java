@@ -6,9 +6,6 @@
  */
 package com.blueprintit.webfetch.v1;
 
-/*import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.HashMap;*/
 import java.io.File;
 import java.util.Map;
 
@@ -31,12 +28,14 @@ public class ScriptingEnvironment
 	private Context jsContext;
 	private Scriptable jsScope;
 	private DownloadSettings settings;
+	private int depth;
 	
 	/**
 	 * @param env
 	 */
 	public ScriptingEnvironment(File base, Environment env)
 	{
+		depth=0;
 		this.env=env;
 		settings = new DownloadSettings(base,env);
 		jsContext = Context.enter();
@@ -52,14 +51,26 @@ public class ScriptingEnvironment
 	
 	public void enterNewScope()
 	{
-		Scriptable newScope = jsContext.initStandardObjects();
-		newScope.setParentScope(jsScope);
-		jsScope=newScope;
+		try
+		{
+			assert jsScope!=null;
+			Scriptable newScope = jsContext.newObject(jsScope);
+			newScope.setParentScope(null);
+			newScope.setPrototype(jsScope);
+			jsScope=newScope;
+			depth++;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public void exitCurrentScope()
 	{
-		jsScope=jsScope.getParentScope();
+		assert depth>0;
+		jsScope=jsScope.getPrototype();
+		depth--;
 	}
 	
 	public boolean isDecided()

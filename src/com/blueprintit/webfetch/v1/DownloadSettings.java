@@ -46,7 +46,7 @@ public class DownloadSettings
 			this.referer = new URLBuilder(referer);
 	}
 	
-	public void setBaseDir(File base)
+	void setBaseDir(File base)
 	{
 		this.base=base;
 	}
@@ -81,17 +81,31 @@ public class DownloadSettings
 	
 	public String getFile()
 	{
-		return file.toString();
+		if (file!=null)
+		{
+			return file.toString();
+		}
+		else
+		{
+			return "";
+		}
 	}
 	
 	public void setFile(String value)
 	{
-		if (value.startsWith("/"))
+		if (value.length()==0)
 		{
-			value=value.substring(1);
+			file=null;
 		}
-		value.replace('/',File.separatorChar);
-		file = new File(base,value);
+		else
+		{
+			if (value.startsWith("/"))
+			{
+				value=value.substring(1);
+			}
+			value.replace('/',File.separatorChar);
+			file = new File(base,value);
+		}
 	}
 	
 	public boolean isAccepted()

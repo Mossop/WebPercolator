@@ -178,7 +178,7 @@ public class ConfigurationSet extends Block
 	{
 		if (element.getNodeName().equals("Subset"))
 		{
-			configsets.add(new ConfigurationSet(element));
+			configsets.add(new ConfigurationSet(this,element));
 			return true;
 		}
 		if (element.getNodeName().equals("Table"))
@@ -234,7 +234,7 @@ public class ConfigurationSet extends Block
 	
 	private void doApplyConfigurationSet(ScriptingEnvironment env)
 	{
-		Table start = findTable("");
+		Table start = findTable(null);
 		if (start!=null)
 		{
 			start.execute(this,env);
@@ -275,12 +275,13 @@ public class ConfigurationSet extends Block
 				{
 					config.applyConfigurationSet(env);
 					if (env.isDecided())
-						return;
+						break;
 					env.setBaseDir((File)getSetting("basedir"));
 				}
 			}
-			doApplyConfigurationSet(env);
 		}
+		if (!env.isDecided())
+			doApplyConfigurationSet(env);
 		if (newScope)
 			env.exitCurrentScope();
 	}

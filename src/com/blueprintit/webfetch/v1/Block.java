@@ -109,6 +109,6 @@ public class Block extends ConditionGroup implements ActionSet, ConditionSet
 				throw new ConfigurationParseException("scope should be new or current");
 			}
 		}
-		super.parseElement(element);
+		//super.parseElement(element);
 	}
 }

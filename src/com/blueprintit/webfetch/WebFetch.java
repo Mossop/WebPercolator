@@ -68,13 +68,27 @@ public class WebFetch implements DownloadListener
 		config.applyConfiguration(env);
 		if (env.isAccepted())
 		{
-			if ((!(env.getFile().exists()))||(env.isOverwriting()))
+			if (env.getFile()==null)
 			{
-				queue.add(new EnvironmentDownload(env));
+				if (env.isParsing())
+				{
+					queue.add(new EnvironmentDownload(env));
+				}
+				else
+				{
+					System.err.println("No point in downloading "+env.getTarget());
+				}
 			}
-			else if (env.isParsing())
+			else
 			{
-				parse(env.getTarget(),env.getFile());
+				if ((!(env.getFile().exists()))||(env.isOverwriting()))
+				{
+					queue.add(new EnvironmentDownload(env));
+				}
+				else if (env.isParsing())
+				{
+					parse(env.getTarget(),env.getFile());
+				}
 			}
 		}
 	}
