@@ -27,7 +27,6 @@ public class StringCompare extends AbstractCondition
 	{
 		values = new ArrayList();
 		types = new ArrayList();
-		super.parseConfig(element);
 		if (types.size()<2)
 		{
 			System.err.println("There should be at least two values in a string compare");

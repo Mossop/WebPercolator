@@ -33,6 +33,8 @@ public class Block extends ConditionGroup implements ActionSet, ConditionSet
 		actionmap.put("Call","com.blueprintit.webfetch.v1.actions.CallAction");
 		actionmap.put("Log","com.blueprintit.webfetch.v1.actions.LogAction");
 		actionmap.put("Script","com.blueprintit.webfetch.v1.actions.ScriptAction");
+		actionmap.put("Parse","com.blueprintit.webfetch.v1.actions.ParseSettingAction");
+		actionmap.put("Overwrite","com.blueprintit.webfetch.v1.actions.OverwriteSettingAction");
 	}
 	
 	public Block(boolean matchAll)
@@ -90,7 +92,7 @@ public class Block extends ConditionGroup implements ActionSet, ConditionSet
 		return super.parseSubElement(element);
 	}
 	
-	public void parseConfig(Element element) throws ConfigurationParseException
+	public void parseElement(Element element) throws ConfigurationParseException
 	{
 		if (element.hasAttribute("scope"))
 		{
@@ -107,6 +109,6 @@ public class Block extends ConditionGroup implements ActionSet, ConditionSet
 				throw new ConfigurationParseException("scope should be new or current");
 			}
 		}
-		super.parseConfig(element);
+		super.parseElement(element);
 	}
 }

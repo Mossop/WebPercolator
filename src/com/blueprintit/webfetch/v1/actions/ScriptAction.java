@@ -20,9 +20,10 @@ public class ScriptAction extends AbstractAction
 {
 	private String content;
 	
-	public void parseConfig(Element element) throws ConfigurationParseException
+	public void parseElement(Element element) throws ConfigurationParseException
 	{
 		content=getElementText(element);
+		super.parseElement(element);
 	}
 	
 	public void execute(ConfigurationSet config, ScriptingEnvironment env)

@@ -45,6 +45,10 @@ public abstract class ElementConfigParser
 
 	protected abstract boolean parseSubElement(Element element) throws ConfigurationParseException;
 	
+	protected void parseElement(Element element) throws ConfigurationParseException
+	{
+	}
+	
 	private void parseSubElements(Element element) throws ConfigurationParseException
 	{
 		NodeList nodes = element.getChildNodes();
@@ -104,8 +108,9 @@ public abstract class ElementConfigParser
 		}
 	}
 	
-	public void parseConfig(Element element) throws ConfigurationParseException
+	public final void parseConfig(Element element) throws ConfigurationParseException
 	{
+		parseElement(element);
 		parseSubElements(element);
 	}
 }

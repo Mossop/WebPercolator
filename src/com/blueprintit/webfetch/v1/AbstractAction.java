@@ -17,7 +17,7 @@ public abstract class AbstractAction extends ElementConfigParser implements Acti
 {
 	protected String type = "text/javascript";
 	
-	public void parseConfig(Element element) throws ConfigurationParseException
+	public void parseElement(Element element) throws ConfigurationParseException
 	{
 		if (element.hasAttribute("type"))
 		{

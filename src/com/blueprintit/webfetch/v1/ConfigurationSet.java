@@ -217,7 +217,7 @@ public class ConfigurationSet extends Block
 		return super.parseSubElement(element);
 	}
 	
-	public void parseConfig(Element element) throws ConfigurationParseException
+	public void parseElement(Element element) throws ConfigurationParseException
 	{
 		if (element.hasAttribute("basedir"))
 		{
@@ -229,7 +229,7 @@ public class ConfigurationSet extends Block
 			}
 			setCascadingSetting("basedir",current);
 		}
-		super.parseConfig(element);
+		super.parseElement(element);
 	}
 	
 	private void doApplyConfigurationSet(ScriptingEnvironment env)

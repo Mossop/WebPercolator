@@ -25,7 +25,7 @@ public abstract class AbstractCondition extends ElementConfigParser implements C
 	
 	public abstract void parseCondition(Element element) throws ConfigurationParseException;
 	
-	public final void parseConfig(Element element) throws ConfigurationParseException
+	public final void parseElement(Element element) throws ConfigurationParseException
 	{
 		if (element.hasAttribute("type"))
 		{

@@ -118,7 +118,7 @@ public class ConditionGroup extends ElementConfigParser implements ConditionSet
 		return false;
 	}
 
-	public void parseConfig(Element element) throws ConfigurationParseException
+	public void parseElement(Element element) throws ConfigurationParseException
 	{
 		if (element.getNodeName().equals("Conditions"))
 		{
@@ -155,6 +155,5 @@ public class ConditionGroup extends ElementConfigParser implements ConditionSet
 		{
 			assert false;
 		}
-		super.parseConfig(element);
 	}
 }

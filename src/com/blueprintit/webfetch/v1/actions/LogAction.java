@@ -25,10 +25,10 @@ public class LogAction extends AbstractAction
 		type="text/plain";
 	}
 	
-	public void parseConfig(Element element) throws ConfigurationParseException
+	public void parseElement(Element element) throws ConfigurationParseException
 	{
 		content=getElementText(element);
-		super.parseConfig(element);
+		super.parseElement(element);
 	}
 
 	public void execute(ConfigurationSet config, ScriptingEnvironment env)

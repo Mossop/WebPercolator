@@ -86,12 +86,11 @@ public class Table extends ElementConfigParser implements Action
 		return false;
 	}
 	
-	public void parseConfig(Element element) throws ConfigurationParseException
+	public void parseElement(Element element) throws ConfigurationParseException
 	{
 		if (element.hasAttribute("name"))
 		{
 			name=element.getAttribute("name");
 		}
-		super.parseConfig(element);
 	}
 }
