@@ -108,7 +108,12 @@ public class SetAction extends AbstractAction implements Condition
 		}
 		if (element.hasAttribute("regex"))
 		{
-			regex = Pattern.compile(element.getAttribute("regex"));
+			int flags=0;
+			if ((element.hasAttribute("insensitive"))&&(Boolean.valueOf(element.getAttribute("insensitive")).booleanValue()))
+			{
+				flags=flags|Pattern.CASE_INSENSITIVE;
+			}
+			regex = Pattern.compile(element.getAttribute("regex"),flags);
 		}
 		if (element.hasAttribute("replacement"))
 		{

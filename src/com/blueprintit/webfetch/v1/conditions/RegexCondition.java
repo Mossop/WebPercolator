@@ -36,6 +36,14 @@ public class RegexCondition extends AbstractCondition
 		{
 			target = element.getAttribute("target");
 		}
+		else if (element.hasAttribute("source"))
+		{
+			target = element.getAttribute("source");
+		}
+		else
+		{
+			throw new ConfigurationParseException("Regex tag must have a source/target");
+		}
 		if (element.hasAttribute("match"))
 		{
 			any=false;
@@ -56,6 +64,11 @@ public class RegexCondition extends AbstractCondition
 				throw new ConfigurationParseException("Invalid setting for match");
 			}
 		}
+		int flags=0;
+		if ((element.hasAttribute("insensitive"))&&(Boolean.valueOf(element.getAttribute("insensitive")).booleanValue()))
+		{
+			flags=flags|Pattern.CASE_INSENSITIVE;
+		}
 		String text = getElementText(element);
 		if (text.length()==0)
 		{
@@ -63,7 +76,7 @@ public class RegexCondition extends AbstractCondition
 		}
 		try
 		{
-			pattern = Pattern.compile(text);
+			pattern = Pattern.compile(text,flags);
 		}
 		catch (PatternSyntaxException e)
 		{
