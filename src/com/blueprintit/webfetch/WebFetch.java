@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -16,12 +16,34 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import com.blueprintit.webfetch.v1.V1ConfigurationParser;
+import com.blueprintit.webpercolator.Download;
+import com.blueprintit.webpercolator.DownloadQueue;
 
 /**
  * @author Dave
  */
 public class WebFetch
 {
+	private Configuration config;
+	private DownloadQueue queue;
+	
+	public WebFetch(Collection downloads, Configuration config)
+	{
+		this.config=config;
+		queue = new DownloadQueue();
+		Iterator loop = downloads.iterator();
+		while (loop.hasNext())
+		{
+			Download download = (Download)loop.next();
+			queue.add(download);
+		}
+	}
+	
+	public void start()
+	{
+		queue.start();
+	}
+	
 	public static Configuration loadConfig(File file)
 	{
 		try
@@ -46,7 +68,7 @@ public class WebFetch
 							System.err.println("Unknown configuration version: "+version);
 							return null;
 					}
-					return parser.parseConfiguration(document);
+					return parser.parseConfiguration(root);
 				}
 				else
 				{
@@ -75,7 +97,7 @@ public class WebFetch
 	public static void main(String[] args)
 	{
 		Configuration config = null;
-		List urls = new ArrayList();
+		Collection urls = new LinkedList();
 		for (int loop=0; loop<args.length; loop++)
 		{
 			boolean used=false;
@@ -107,6 +129,25 @@ public class WebFetch
 		if (config!=null)
 		{
 			urls.addAll(config.getURLs());
+			Collection downloads = new LinkedList();
+			Iterator loop = urls.iterator();
+			while (loop.hasNext())
+			{
+				URL url = (URL)loop.next();
+				Download download = config.getDownload(url);
+				if (download!=null)
+				{
+					downloads.add(download);
+				}
+			}
+			if (downloads.size()>0)
+			{
+				(new WebFetch(downloads,config)).start();
+			}
+			else
+			{
+				System.err.println("No urls specified to download");
+			}
 		}
 		else
 		{
