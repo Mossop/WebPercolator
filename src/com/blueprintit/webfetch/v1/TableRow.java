@@ -24,6 +24,7 @@ public class TableRow extends ConditionSet
 		actionmap = new HashMap();
 		actionmap.put("Accept","com.blueprintit.webfetch.v1.actions.AcceptAction");
 		actionmap.put("Reject","com.blueprintit.webfetch.v1.actions.RejectAction");
+		actionmap.put("Call","com.blueprintit.webfetch.v1.actions.CallAction");
 	}
 	
 	public TableRow()
