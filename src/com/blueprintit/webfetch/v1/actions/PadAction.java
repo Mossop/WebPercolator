@@ -26,7 +26,7 @@ public class PadAction extends AbstractAction
 	
 	public void execute(ConfigurationSet config, ScriptingEnvironment env)
 	{
-		String text = env.evaluateAsString(target,type);
+		String text = env.evaluateAsString(source,type);
 		while (text.length()<length)
 		{
 			if (left)
