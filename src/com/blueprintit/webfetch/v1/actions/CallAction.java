@@ -3,9 +3,9 @@ package com.blueprintit.webfetch.v1.actions;
 import org.w3c.dom.Element;
 
 import com.blueprintit.webfetch.ConfigurationParseException;
-import com.blueprintit.webfetch.Environment;
 import com.blueprintit.webfetch.v1.Action;
 import com.blueprintit.webfetch.v1.ConfigurationSet;
+import com.blueprintit.webfetch.v1.ScriptingEnvironment;
 import com.blueprintit.webfetch.v1.Table;
 
 /**
@@ -27,7 +27,7 @@ public class CallAction implements Action
 		}
 	}
 
-	public void execute(ConfigurationSet config, Environment env)
+	public void execute(ConfigurationSet config, ScriptingEnvironment env)
 	{
 		Table table = config.findTable(tablename);
 		if (table!=null)

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.w3c.dom.Element;
-import com.blueprintit.webfetch.*;
 import com.blueprintit.webfetch.ConfigurationParseException;
 
 /**
@@ -116,7 +115,7 @@ public class ConditionSet extends ElementConfigParser implements Condition
 		super.parseConfig(element);
 	}
 
-	public boolean matches(Environment env)
+	public boolean matches(ScriptingEnvironment env)
 	{
 		if (conditions.size()==0)
 		{

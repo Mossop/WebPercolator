@@ -6,8 +6,8 @@ import java.util.regex.PatternSyntaxException;
 import org.w3c.dom.Element;
 
 import com.blueprintit.webfetch.ConfigurationParseException;
-import com.blueprintit.webfetch.Environment;
 import com.blueprintit.webfetch.v1.AbstractCondition;
+import com.blueprintit.webfetch.v1.ScriptingEnvironment;
 
 /**
  * @author Dave
@@ -38,7 +38,7 @@ public class RegexCondition extends AbstractCondition
 		}
 	}
 
-	public boolean checkForMatch(Environment env)
+	public boolean checkForMatch(ScriptingEnvironment env)
 	{
 		return pattern.matcher(env.getValue(target)).matches();
 	}

@@ -9,12 +9,11 @@ import java.util.Map;
 import org.w3c.dom.Element;
 
 import com.blueprintit.webfetch.ConfigurationParseException;
-import com.blueprintit.webfetch.Environment;
 
 /**
  * @author Dave
  */
-public class TableRow extends ConditionSet
+public class TableRow extends ConditionSet implements Action
 {
 	private static Map actionmap;
 	private List actions;
@@ -72,7 +71,7 @@ public class TableRow extends ConditionSet
 		return super.parseSubElement(element);
 	}
 
-	public void execute(ConfigurationSet config, Environment env)
+	public void execute(ConfigurationSet config, ScriptingEnvironment env)
 	{
 		Iterator loop = actions.iterator();
 		while (loop.hasNext())

@@ -1,7 +1,7 @@
 package com.blueprintit.webfetch.v1;
 
 import org.w3c.dom.Element;
-import com.blueprintit.webfetch.*;
+
 import com.blueprintit.webfetch.ConfigurationParseException;
 
 /**
@@ -26,9 +26,9 @@ public abstract class AbstractCondition extends ElementConfigParser implements C
 		}
 	}
 
-	public abstract boolean checkForMatch(Environment env);
+	public abstract boolean checkForMatch(ScriptingEnvironment env);
 	
-	public final boolean matches(Environment env)
+	public final boolean matches(ScriptingEnvironment env)
 	{
 		return invert ^ checkForMatch(env);
 	}

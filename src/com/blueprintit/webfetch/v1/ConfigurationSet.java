@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import org.w3c.dom.Element;
 import com.blueprintit.webfetch.ConfigurationParseException;
-import com.blueprintit.webfetch.Environment;
 
 /**
  * @author Dave
@@ -101,11 +100,11 @@ public class ConfigurationSet extends ConditionSet
 		return super.parseSubElement(element);
 	}
 	
-	private void doApplyConfiguration(Environment env)
+	private void doApplyConfiguration(ScriptingEnvironment env)
 	{	
 	}
 	
-	void applyConfiguration(Environment env)
+	protected void applyConfiguration(ScriptingEnvironment env)
 	{
 		Iterator loop = configsets.iterator();
 		while (loop.hasNext())

@@ -5,16 +5,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import com.blueprintit.webfetch.ConfigurationParseException;
-import com.blueprintit.webfetch.Environment;
 
 /**
  * @author Dave
  */
-public class Table
+public class Table extends ElementConfigParser implements Action
 {
 	private List rows;
 	private String name = "";
@@ -27,29 +23,10 @@ public class Table
 	public Table(Element element) throws ConfigurationParseException
 	{
 		this();
-		if (element.hasAttribute("name"))
-		{
-			name=element.getAttribute("name");
-		}
-		NodeList childs = element.getChildNodes();
-		for (int loop=0; loop<childs.getLength(); loop++)
-		{
-			if (childs.item(loop).getNodeType()==Node.ELEMENT_NODE)
-			{
-				Element el = (Element)childs.item(loop);
-				if (el.getNodeName().equals("Row"))
-				{
-					rows.add(new TableRow(el));
-				}
-				else
-				{
-					throw new ConfigurationParseException("Invalid element in configuration: "+el.getNodeName());
-				}
-			}
-		}
+		parseConfig(element);
 	}
 	
-	public void execute(ConfigurationSet config, Environment env)
+	public void execute(ConfigurationSet config, ScriptingEnvironment env)
 	{
 		Iterator loop = rows.iterator();
 		while (loop.hasNext())
@@ -70,5 +47,24 @@ public class Table
 	public String getName()
 	{
 		return name;
+	}
+
+	protected boolean parseSubElement(Element element) throws ConfigurationParseException
+	{
+		if (element.getNodeName().equals("Row"))
+		{
+			rows.add(new TableRow(element));
+			return true;
+		}
+		return false;
+	}
+	
+	public void parseConfig(Element element) throws ConfigurationParseException
+	{
+		if (element.hasAttribute("name"))
+		{
+			name=element.getAttribute("name");
+		}
+		super.parseConfig(element);
 	}
 }
