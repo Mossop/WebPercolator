@@ -81,13 +81,13 @@ public class Callback extends ParserCallback
 					String value = (String)attr.getAttribute(tagattrs.get(tag));
 					if (value!=null)
 					{
-						if (!(value.startsWith("javascript:")||value.startsWith("mailto:")))
+						value=value.replaceAll(" ","%20");
+						if ((value.length()>0)&&(value.charAt(0)=='?'))
 						{
-							value=value.replaceAll(" ","%20");
-							if ((value.length()>0)&&(value.charAt(0)=='?'))
-							{
-								value=base.getPath()+value;
-							}
+							value=base.getPath()+value;
+						}
+						if (!(value.toLowerCase().startsWith("javascript:")||value.toLowerCase().startsWith("mailto:")))
+						{
 							URL newurl = new URL(base,value);
 							Link newlink = new Link(newurl,(LinkType)taglinktypes.get(tag));
 							if (!links.contains(newlink))

@@ -33,10 +33,12 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 	private List environments;
 	private List authdetails;
 	private List cookies;
+	private int maxdownloads;
 	
 	public V1Configuration(File base, Element element) throws ConfigurationParseException
 	{
 		super();
+		maxdownloads=5;
 		setCascadingSetting("basedir",base);
 		environments = new ArrayList();
 		cookies = new ArrayList();
@@ -44,6 +46,11 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 		parseConfig(element);
 	}
 	
+	public int getMaxDownloads()
+	{
+		return maxdownloads;
+	}
+
 	public Collection getEnvironments()
 	{
 		return environments;
@@ -193,6 +200,22 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 			}
 		}
 		return super.parseSubElement(element);
+	}
+	
+	public void parseElement(Element element) throws ConfigurationParseException
+	{
+		if (element.hasAttribute("maxDownloads"))
+		{
+			try
+			{
+				maxdownloads = Integer.parseInt(element.getAttribute("maxDownloads"));
+			}
+			catch (NumberFormatException e)
+			{
+				throw new ConfigurationParseException("maxDownloads attribute must be a number.",e);
+			}
+		}
+		super.parseElement(element);
 	}
 	
 	public void initialiseHttpState(HttpState state)

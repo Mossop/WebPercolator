@@ -149,7 +149,7 @@ public class WebFetch
 			}
 		});
 		
-		queue.setMaxDownloads(5);
+		queue.setMaxDownloads(config.getMaxDownloads());
 		
 		initialurlcache = new HashSet();
 		urlcache = new HashSet();

@@ -20,4 +20,6 @@ public interface Configuration
 	public void initialiseHttpState(HttpState state);
 	
 	public void applyConfiguration(Environment env);
+
+	public int getMaxDownloads();
 }
