@@ -29,6 +29,8 @@ public class ConditionGroup extends ElementConfigParser implements ConditionSet
 	{
 		conditionmap = new HashMap();
 		conditionmap.put("Regex","com.blueprintit.webfetch.v1.conditions.RegexCondition");
+		conditionmap.put("ScriptTest","com.blueprintit.webfetch.v1.conditions.ScriptCondition");
+		conditionmap.put("StringCompare","com.blueprintit.webfetch.v1.conditions.StringCompare");
 		conditionmap.put("Or","com.blueprintit.webfetch.v1.ConditionGroup");
 		conditionmap.put("And","com.blueprintit.webfetch.v1.ConditionGroup");
 		conditionmap.put("Conditions","com.blueprintit.webfetch.v1.ConditionGroup");
