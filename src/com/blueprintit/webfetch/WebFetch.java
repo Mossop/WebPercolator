@@ -74,6 +74,24 @@ public class WebFetch implements DownloadListener
 		}
 	}
 	
+	private boolean checkDirectory(File dir)
+	{
+		if (dir.isDirectory())
+		{
+			log.info("isDirectory "+dir);
+			return true;
+		}
+		else if (dir.exists())
+		{
+			log.info("exists "+dir);
+			return false;
+		}
+		else
+		{
+			return checkDirectory(dir.getParentFile());
+		}
+	}
+	
 	public synchronized void addEnvironment(Environment env)
 	{
 		if (!urlcache.contains(env.getTarget()))
@@ -86,8 +104,7 @@ public class WebFetch implements DownloadListener
 				{
 					if (env.isParsing())
 					{
-						log.info("Would download to temporary place and attempt to parse");
-						//queue.add(new EnvironmentDownload(env));
+						queue.add(new EnvironmentDownload(env));
 					}
 					else
 					{
@@ -98,13 +115,19 @@ public class WebFetch implements DownloadListener
 				{
 					if ((!(env.getFile().exists()))||(env.isOverwriting()))
 					{
-						log.info("Would download to "+env.getFile().getAbsolutePath());
-						//queue.add(new EnvironmentDownload(env));
+						File parent = env.getFile().getParentFile();
+						if ((parent.isDirectory())||((checkDirectory(parent))&&(parent.mkdirs())))
+						{
+							queue.add(new EnvironmentDownload(env));							
+						}
+						else
+						{
+							log.error("Would be unable to store at "+env.getFile());
+						}
 					}
 					else if (env.isParsing())
 					{
-						log.info("Would parse "+env.getFile());
-						//parse(env.getTarget(),env.getFile());
+						parse(env.getTarget(),env.getFile());
 					}
 				}
 			}
