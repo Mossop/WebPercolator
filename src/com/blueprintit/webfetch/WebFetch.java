@@ -30,14 +30,14 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import com.blueprintit.webfetch.v1.V1ConfigurationParser;
+import com.blueprintit.webpercolator.DownloadAdapter;
 import com.blueprintit.webpercolator.DownloadEvent;
-import com.blueprintit.webpercolator.DownloadListener;
 import com.blueprintit.webpercolator.DownloadQueue;
 import com.blueprintit.webpercolator.HtmlLinkParser;
+import com.blueprintit.webpercolator.QueueAdapter;
 import com.blueprintit.webpercolator.QueueEvent;
-import com.blueprintit.webpercolator.QueueListener;
 
-public class WebFetch implements DownloadListener, QueueListener
+public class WebFetch
 {
 	private Configuration config;
 	private DownloadQueue queue;
@@ -64,7 +64,66 @@ public class WebFetch implements DownloadListener, QueueListener
 		running=false;
 		this.config=config;
 		queue = new DownloadQueue();
-		queue.addDownloadListener(this);
+		
+		queue.addQueueListener(new QueueAdapter() {
+			public void queueComplete(Object sender, QueueEvent e)
+			{
+				potentiallyFinished();
+			}
+		});
+		
+		queue.addDownloadListener(new DownloadAdapter() {
+			public void downloadComplete(DownloadEvent e)
+			{
+				System.out.println(e.getDownload().getURL()+" downloaded to "+e.getLocalFile());
+				EnvironmentDownload download = (EnvironmentDownload)e.getDownload();
+				boolean parse = false;
+				if (download.getLocalFile()==null)
+				{
+					parse=true;
+				}
+				else
+				{
+					synchronized(filecache)
+					{
+						if (filecache.containsKey(download.getLocalFile()))
+						{
+							parse=((Boolean)filecache.get(download.getLocalFile())).booleanValue();
+							filecache.remove(download.getLocalFile());
+						}
+					}
+				}
+				if (parse)
+				{
+					addParseDetails(new ParseDetails(download.getURL(),e.getLocalFile()));
+				}
+			}
+
+			public void downloadFailed(DownloadEvent e)
+			{
+				// TODO add checking for valid HTTP errors that should not be repeated
+				
+				Environment env = ((EnvironmentDownload)e.getDownload()).getEnvironment();
+				if (env.getAttempts()>0)
+				{
+					System.out.println("Retrying download "+env.getTarget());
+					addEnvironmentToDownload(env);
+				}
+				else
+				{
+					System.err.println("Failed to download "+e.getDownload().getURL()+": "+e.getException().getMessage());
+				}
+			}
+
+			public void downloadRedirected(DownloadEvent e)
+			{
+				EnvironmentDownload download = (EnvironmentDownload)e.getDownload();
+				Environment env = download.getEnvironment();
+				Environment newenv = new Environment(e.getRedirectURL(),env.getReferer());
+				addEnvironmentForDecision(newenv);
+			}
+		});
+		
 		queue.setMaxDownloads(5);
 		
 		initialurlcache = new HashSet();
@@ -245,73 +304,6 @@ public class WebFetch implements DownloadListener, QueueListener
 			}
 		}
 		return result;
-	}
-
-	public void downloadStarted(DownloadEvent e)
-	{
-	}
-
-	public void downloadUpdate(DownloadEvent e)
-	{
-	}
-
-	public void downloadComplete(DownloadEvent e)
-	{
-		System.out.println(e.getDownload().getURL()+" downloaded to "+e.getLocalFile());
-		EnvironmentDownload download = (EnvironmentDownload)e.getDownload();
-		boolean parse = false;
-		if (download.getLocalFile()==null)
-		{
-			parse=true;
-		}
-		else
-		{
-			synchronized(filecache)
-			{
-				if (filecache.containsKey(download.getLocalFile()))
-				{
-					parse=((Boolean)filecache.get(download.getLocalFile())).booleanValue();
-					filecache.remove(download.getLocalFile());
-				}
-			}
-		}
-		if (parse)
-		{
-			addParseDetails(new ParseDetails(download.getURL(),e.getLocalFile()));
-		}
-	}
-
-	public void downloadFailed(DownloadEvent e)
-	{
-		// TODO add checking for valid HTTP errors that should not be repeated
-		
-		Environment env = ((EnvironmentDownload)e.getDownload()).getEnvironment();
-		if (env.getAttempts()>0)
-		{
-			System.out.println("Retrying download "+env.getTarget());
-			addEnvironmentToDownload(env);
-		}
-		else
-		{
-			System.err.println("Failed to download "+e.getDownload().getURL()+": "+e.getException().getMessage());
-		}
-	}
-
-	public void downloadRedirected(DownloadEvent e)
-	{
-		EnvironmentDownload download = (EnvironmentDownload)e.getDownload();
-		Environment env = download.getEnvironment();
-		Environment newenv = new Environment(e.getRedirectURL(),env.getReferer());
-		addEnvironmentForDecision(newenv);
-	}
-	
-	public void queueStarted(Object sender, QueueEvent e)
-	{
-	}
-
-	public void queueComplete(Object sender, QueueEvent e)
-	{
-		potentiallyFinished();
 	}
 
 	public void addEnvironmentToDownload(Environment env)
