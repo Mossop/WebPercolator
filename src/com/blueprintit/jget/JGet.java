@@ -56,7 +56,7 @@ public class JGet implements DownloadListener
 	public JGet(String[] args) throws FileNotFoundException, IOException
 	{
 		queue = new DownloadQueue();
-		queue.setMaxDownloads(2);
+		queue.setMaxDownloads(1);
 		queue.addDownloadListener(this);
 		downloadparents = Collections.synchronizedMap(new HashMap());
 		downloadrecurses = Collections.synchronizedMap(new HashMap());
@@ -147,7 +147,6 @@ public class JGet implements DownloadListener
 			}
 		}
 
-		// TODO implement accept and reject for files and directories
 		String host = url.getHost();
 		String path = url.getPath();
 		String file = "";
@@ -164,16 +163,9 @@ public class JGet implements DownloadListener
 		{
 			return false;
 		}
-		String[] dirs = path.split("/");
-		for (int l = 0; l<dirs.length; l++)
+		if (rejected(path,acceptdirs,rejectdirs))
 		{
-			if (dirs[l].length()>0)
-			{
-				if (rejected(dirs[l],acceptdirs,rejectdirs))
-				{
-					return false;
-				}
-			}
+			return false;
 		}
 
 		return true;
@@ -450,6 +442,8 @@ public class JGet implements DownloadListener
 		options.addOption("H","span-hosts",false,"Allow recursive retrieval to span hosts");
 		options.addOption("np","no-parent",false,"Do not ascend above the parent directory of the initial resource");
 
+		options.addOption(OptionBuilder.withLongOpt("threads").hasArg().withArgName("number").withDescription("The number of connections to use").create());
+
 		try
 		{
 			commandline = parser.parse(options,args);
@@ -487,6 +481,11 @@ public class JGet implements DownloadListener
 				else
 				{
 					basedir = (new File("")).getAbsoluteFile();
+				}
+				
+				if (commandline.hasOption("threads"))
+				{
+					queue.setMaxDownloads(Integer.parseInt(commandline.getOptionValue("threads")));
 				}
 				
 				if (commandline.hasOption("http-user")&&commandline.hasOption("http-passwd"))
@@ -688,6 +687,11 @@ public class JGet implements DownloadListener
 					{
 						System.err.println("Unknown option: "+test);
 					}
+				}
+				
+				if (urlcache.size()==0)
+				{
+					displayHelp(options);
 				}
 			}
 		}
