@@ -14,7 +14,6 @@ import java.util.Map;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.Scriptable;
-
 import com.blueprintit.webfetch.Environment;
 
 /**
@@ -39,6 +38,18 @@ public class ScriptingEnvironment
 		jsScope = jsContext.initStandardObjects();
 		Scriptable target = jsContext.toObject(settings,jsScope);
 		jsScope.put("download",jsScope,target);
+	}
+	
+	public void enterNewScope()
+	{
+		Scriptable newScope = jsContext.initStandardObjects();
+		newScope.setParentScope(jsScope);
+		jsScope=newScope;
+	}
+	
+	public void exitCurrentScope()
+	{
+		jsScope=jsScope.getParentScope();
 	}
 	
 	public boolean isDecided()

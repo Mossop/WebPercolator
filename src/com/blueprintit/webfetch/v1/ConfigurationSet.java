@@ -121,6 +121,7 @@ public class ConfigurationSet extends ConditionSet
 	
 	protected void applyConfigurationSet(ScriptingEnvironment env)
 	{
+		env.enterNewScope();
 		Iterator loop = configsets.iterator();
 		while (loop.hasNext())
 		{
@@ -133,6 +134,7 @@ public class ConfigurationSet extends ConditionSet
 			}
 		}
 		doApplyConfigurationSet(env);
+		env.exitCurrentScope();
 	}
 	
 	public Table findTable(String name)
