@@ -16,6 +16,8 @@ import java.net.URL;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Dave
@@ -27,6 +29,8 @@ public class Downloader implements Runnable
 	private boolean running;
 	private File target;
 	
+	private Log log = LogFactory.getLog(Downloader.class);
+
 	/**
 	 * @param r
 	 */
@@ -128,7 +132,7 @@ public class Downloader implements Runnable
 			else if ((method.getStatusCode()>=300)&&(method.getStatusCode()<400))
 			{
 				URL redirect = new URL(method.getResponseHeader("Location").getValue());
-				//System.out.println("Redirect to: "+redirect.toString());
+				log.info("Redirect to: "+redirect.toString());
 				method.releaseConnection();
 				queue.processDownloadEvent(DownloadEvent.createRedirectEvent(queue,download,redirect));
 			}

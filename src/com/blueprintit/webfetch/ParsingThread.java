@@ -12,6 +12,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.blueprintit.webpercolator.HtmlLinkParser;
 import com.blueprintit.webpercolator.Link;
 
@@ -24,6 +28,8 @@ public class ParsingThread implements Runnable
 	private HtmlLinkParser parser;
 	private boolean running = false;
 	
+	private Log log = LogFactory.getLog(ParsingThread.class);
+
 	public ParsingThread(WebFetch fetch, HtmlLinkParser parser)
 	{
 		webfetch=fetch;
@@ -102,8 +108,7 @@ public class ParsingThread implements Runnable
 				}
 				catch (Throwable t)
 				{
-					System.err.println("Error parsing "+details.getUrl());
-					t.printStackTrace();
+					log.error("Error parsing "+details.getUrl(),t);
 				}
 			}
 		}

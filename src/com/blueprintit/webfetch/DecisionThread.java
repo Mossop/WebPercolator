@@ -99,7 +99,7 @@ public class DecisionThread implements Runnable
 		{
 			if (env.isParsingRemote())
 			{
-				//System.out.println("Added: "+env.getTarget());
+				log.info("Added: "+env.getTarget());
 				webfetch.addEnvironmentToDownload(env);
 			}
 			else
@@ -125,7 +125,7 @@ public class DecisionThread implements Runnable
 					File parent = target.getParentFile();
 					if ((parent.isDirectory())||((checkDirectory(parent))&&(parent.mkdirs())))
 					{
-						//System.out.println("Added: "+env.getTarget());
+						log.info("Added: "+env.getTarget());
 						webfetch.addEnvironmentToDownload(env);
 						filecache.put(target,Boolean.valueOf(env.isParsingRemote()));
 					}
@@ -136,7 +136,7 @@ public class DecisionThread implements Runnable
 				}
 				else if (env.isParsingLocal())
 				{
-					//System.out.println("Parsing local: "+env.getTarget());
+					log.info("Parsing local: "+env.getTarget());
 					webfetch.addParseDetails(new ParseDetails(env.getTarget(),env.getFile()));
 				}
 			}
@@ -165,8 +165,7 @@ public class DecisionThread implements Runnable
 				}
 				catch (Throwable t)
 				{
-					System.err.println("Error applying configuration to "+env.getTarget());
-					t.printStackTrace();
+					log.error("Error applying configuration to "+env.getTarget(),t);
 				}
 			}
 		}

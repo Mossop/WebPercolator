@@ -56,8 +56,6 @@ public class URLBuilder
 		
 		String url = scheme+"://(?:"+userinfo+"@)?"+host+"(?::"+port+")?"+path+"(?:\\?"+query+")?(?:#"+fragment+")?";
 		URL_REGEX = Pattern.compile(url);
-		
-		//System.err.println(url);
 	}
 	
 	public URLBuilder(String url) throws MalformedURLException

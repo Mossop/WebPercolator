@@ -18,6 +18,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -60,7 +62,13 @@ public class WebFetch
 	
 	private boolean running;
 	
-	private static Log log = LogFactory.getLog(WebFetch.class);
+	private static Log log;
+	
+	static
+	{
+		System.setProperty("org.apache.commons.logging.Log","org.apache.commons.logging.impl.Jdk14Logger");
+		log=LogFactory.getLog(WebFetch.class);
+	}
 	
 	public WebFetch(Configuration config)
 	{
@@ -138,11 +146,11 @@ public class WebFetch
 				{
 					if (e.getException()==null)
 					{
-						System.err.println(e.getDownload().getURL()+": "+e.getDownload().getHttpMethod().getStatusLine());
+						log.error(e.getDownload().getURL()+": "+e.getDownload().getHttpMethod().getStatusLine());
 					}
 					else
 					{
-						System.err.println(e.getDownload().getURL()+": "+e.getException().getMessage());
+						log.error(e.getDownload().getURL()+": "+e.getException().getMessage());
 					}
 				}
 			}
@@ -434,6 +442,10 @@ public class WebFetch
 	
 	public static void main(String[] args)
 	{
+		Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.WARNING);
+		Logger.getLogger("com.blueprintit.webfetch").setLevel(Level.WARNING);
+		Logger.getLogger("com.blueprintit.webpercolator").setLevel(Level.WARNING);
+		
 		Configuration config = null;
 		Collection environments = new LinkedList();
 		for (int loop=0; loop<args.length; loop++)
@@ -451,6 +463,55 @@ public class WebFetch
 					}
 				}
 			}
+			if (args[loop].startsWith("--"))
+			{
+				String arg = args[loop].substring(2);
+				String value = null;
+				if (arg.indexOf("=")>0)
+				{
+					value=arg.substring(arg.indexOf("=")+1);
+					arg=arg.substring(0,arg.indexOf("="));
+				}
+				if (arg.equals("debug"))
+				{
+					Level newlevel = Level.INFO;
+					if (value!=null)
+					{
+						if (value.equalsIgnoreCase("DEBUG"))
+						{
+							newlevel=Level.FINE;
+						}
+						else if (value.equalsIgnoreCase("ERROR"))
+						{
+							newlevel=Level.SEVERE;
+						}
+						else if (value.equalsIgnoreCase("FATAL"))
+						{
+							newlevel=Level.SEVERE;
+						}
+						else if (value.equalsIgnoreCase("INFO"))
+						{
+							newlevel=Level.INFO;
+						}
+						else if (value.equalsIgnoreCase("TRACE"))
+						{
+							newlevel=Level.FINEST;
+						}
+						else if (value.equalsIgnoreCase("WARN"))
+						{
+							newlevel=Level.WARNING;
+						}
+						else
+						{
+							log.error("Unknown debug level: "+value);
+						}
+					}
+					Logger.getLogger("org.apache.commons.httpclient").setLevel(newlevel);
+					Logger.getLogger("com.blueprintit.webfetch").setLevel(newlevel);
+					Logger.getLogger("com.blueprintit.webpercolator").setLevel(newlevel);
+					used=true;
+				}
+			}
 			if (!used)
 			{
 				try
@@ -460,8 +521,16 @@ public class WebFetch
 				}
 				catch (MalformedURLException e)
 				{
-					log.error("Unable to parse URL "+args[loop]);
+					log.error("Unknown argument: "+args[loop]);
 				}
+			}
+		}
+		if (config==null)
+		{
+			File testfile = new File("webfetch.xml");
+			if (testfile.isFile())
+			{
+				config=loadConfig(testfile);
 			}
 		}
 		if (config!=null)
