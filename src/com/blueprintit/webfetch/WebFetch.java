@@ -108,36 +108,28 @@ public class WebFetch
 				boolean retryable=true;
 				if (e.getException()==null)
 				{
+					retryable=false;
 					int code = e.getDownload().getHttpMethod().getStatusCode();
-					if (code==403)
+					if ((code==408)||(code==500)||(code==503)||(code==504))
 					{
-						System.err.println("Not authorised to download "+e.getDownload().getURL());
-						retryable=false;
-					}
-					else if (code==404)
-					{
-						System.err.println("File does not exist: "+e.getDownload().getURL());
-						retryable=false;
+						retryable=true;
 					}
 				}
-				if (retryable)
+				Environment env = ((EnvironmentDownload)e.getDownload()).getEnvironment();
+				if ((retryable)&&(env.getAttempts()>0))
 				{
-					Environment env = ((EnvironmentDownload)e.getDownload()).getEnvironment();
-					if (env.getAttempts()>0)
+					System.out.println("Retrying download "+env.getTarget());
+					addEnvironmentToDownload(env);
+				}
+				else
+				{
+					if (e.getException()==null)
 					{
-						System.out.println("Retrying download "+env.getTarget());
-						addEnvironmentToDownload(env);
+						System.err.println("Failed to download "+e.getDownload().getURL()+": "+e.getDownload().getHttpMethod().getStatusLine());
 					}
 					else
 					{
-						if (e.getException()==null)
-						{
-							System.err.println("Failed to download "+e.getDownload().getURL()+": "+e.getDownload().getHttpMethod().getStatusLine());
-						}
-						else
-						{
-							System.err.println("Failed to download "+e.getDownload().getURL()+": "+e.getException().getMessage());
-						}
+						System.err.println("Failed to download "+e.getDownload().getURL()+": "+e.getException().getMessage());
 					}
 				}
 			}
