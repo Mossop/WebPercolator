@@ -25,6 +25,7 @@ public class ConfigurationSet extends Block
 	private Map tables;
 	private Collection patterns;
 	private Map settings;
+	private Map localsettings;
 	
 	protected ConfigurationSet()
 	{
@@ -32,6 +33,7 @@ public class ConfigurationSet extends Block
 		newScope=true;
 		tables = new HashMap();
 		settings = new HashMap();
+		localsettings = new HashMap();
 		configsets = new LinkedList();
 		patterns = new LinkedList();
 	}
@@ -49,31 +51,95 @@ public class ConfigurationSet extends Block
 		parseConfig(element);
 	}
 
-	private Object getSetting(String name)
+	private Object getLocalSetting(String name)
+	{
+		return localsettings.get(name);
+	}
+	
+	private Object getCascadingSetting(String name)
 	{
 		if (settings.containsKey(name))
 		{
 			return settings.get(name);
 		}
+		else if (parent!=null)
+		{
+			return parent.getCascadingSetting(name);
+		}
 		else
 		{
-			return parent.getSetting(name);
+			return null;
 		}
 	}
 	
-	private void setSetting(String name, Object value)
+	private Object getSetting(String name)
 	{
-		settings.put(name,value);
+		Object result = getLocalSetting(name);
+		if (result!=null)
+			return result;
+
+		result = getCascadingSetting(name);
+		if (result!=null)
+			return result;
+		
+		return null;
 	}
 	
-	private void setSetting(String name, boolean value)
+	private boolean isSet(String name)
 	{
-		setSetting(name,Boolean.valueOf(value));
+		return getSetting(name)!=null;
 	}
 	
-	private void setSetting(String name, int value)
+	private void setLocalSetting(String name, boolean value)
 	{
-		setSetting(name,new Integer(value));
+		setSetting(name,value,false);
+	}
+
+	private void setCascadingSetting(String name, boolean value)
+	{
+		setSetting(name,value,false);
+	}
+
+	private void setLocalSetting(String name, int value)
+	{
+		setSetting(name,value,false);
+	}
+
+	private void setCascadingSetting(String name, int value)
+	{
+		setSetting(name,value,false);
+	}
+
+	private void setLocalSetting(String name, Object value)
+	{
+		setSetting(name,value,false);
+	}
+
+	private void setCascadingSetting(String name, Object value)
+	{
+		setSetting(name,value,false);
+	}
+
+	private void setSetting(String name, Object value, boolean cascading)
+	{
+		if (cascading)
+		{
+			settings.put(name,value);			
+		}
+		else
+		{
+			localsettings.put(name,value);
+		}
+	}
+	
+	private void setSetting(String name, boolean value, boolean cascading)
+	{
+		setSetting(name,Boolean.valueOf(value),cascading);
+	}
+	
+	private void setSetting(String name, int value, boolean cascading)
+	{
+		setSetting(name,new Integer(value),cascading);
 	}
 	
 	private boolean getBooleanSetting(String name)
@@ -110,6 +176,33 @@ public class ConfigurationSet extends Block
 			tables.put(table.getName(),table);
 			return true;
 		}
+		if (element.getNodeName().equals("Default"))
+		{
+			boolean cascade=false;
+			if (element.hasAttribute("cascade"))
+			{
+				cascade = Boolean.valueOf(element.getAttribute("cascade")).booleanValue();
+			}
+			if (element.hasAttribute("policy"))
+			{
+				if (element.getAttribute("policy").equals("accept"))
+				{
+					setSetting("policy",true,cascade);				
+				}
+				else if (element.getAttribute("policy").equals("reject"))
+				{
+					setSetting("policy",false,cascade);
+				}
+				else
+				{
+					throw new ConfigurationParseException("A policy must be accept or reject.");
+				}
+			}
+			else
+			{
+				throw new ConfigurationParseException("A policy must be set with the default element.");
+			}
+		}
 		return super.parseSubElement(element);
 	}
 	
@@ -123,6 +216,20 @@ public class ConfigurationSet extends Block
 		else
 		{
 			System.err.println("No default table found");
+		}
+		if (!env.isDecided())
+		{
+			if (isSet("policy"))
+			{
+				if (getBooleanSetting("policy"))
+				{
+					env.getDownloadSettings().accept();
+				}
+				else
+				{
+					env.getDownloadSettings().reject();
+				}
+			}
 		}
 	}
 	
