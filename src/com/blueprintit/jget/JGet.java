@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -93,9 +94,12 @@ public class JGet implements DownloadListener
 			Iterator loop = accept.iterator();
 			while (loop.hasNext())
 			{
-				String test = (String)loop.next();
-				if (text.matches(test))
+				Pattern test = (Pattern)loop.next();
+				if (test.matcher(text).find())
+				{
+					//System.out.println("Accepted by "+test.pattern());
 					return false;
+				}
 			}
 			return true;
 		}
@@ -104,11 +108,15 @@ public class JGet implements DownloadListener
 			Iterator loop = reject.iterator();
 			while (loop.hasNext())
 			{
-				String test = (String)loop.next();
-				if (text.matches(test))
+				Pattern test = (Pattern)loop.next();
+				if (test.matcher(text).find())
+				{
+					//System.out.println("Rejected by "+test.pattern());
 					return true;
+				}
 			}
 		}
+		//System.out.println("Defaulting to accept");
 		return false;
 	}
 	
@@ -154,7 +162,7 @@ public class JGet implements DownloadListener
 		if (path.indexOf("/")>=0)
 		{
 			file=path.substring(path.lastIndexOf("/")+1);
-			path=path.substring(0,path.lastIndexOf("/"));
+			path=path.substring(0,path.lastIndexOf("/")+1);
 		}
 		if (rejected(host,accepthosts,rejecthosts))
 		{
@@ -519,7 +527,8 @@ public class JGet implements DownloadListener
 						{
 							if (parts[partloop].length()>0)
 							{
-								acceptfiles.add(escapeRegex(parts[partloop])+"$");
+								//System.out.println("Adding file accept: "+parts[partloop]);
+								acceptfiles.add(Pattern.compile(parts[partloop]));
 							}
 						}
 					}
@@ -535,7 +544,8 @@ public class JGet implements DownloadListener
 						{
 							if (parts[partloop].length()>0)
 							{
-								rejectfiles.add(escapeRegex(parts[partloop])+"$");
+								//System.out.println("Adding file reject: "+parts[partloop]);
+								rejectfiles.add(Pattern.compile(parts[partloop]));
 							}
 						}
 					}
@@ -551,7 +561,8 @@ public class JGet implements DownloadListener
 						{
 							if (parts[partloop].length()>0)
 							{
-								acceptdirs.add(escapeRegex(parts[partloop]));
+								//System.out.println("Adding path accept: "+parts[partloop]);
+								acceptdirs.add(Pattern.compile(parts[partloop]));
 							}
 						}
 					}
@@ -567,7 +578,8 @@ public class JGet implements DownloadListener
 						{
 							if (parts[partloop].length()>0)
 							{
-								rejectdirs.add(escapeRegex(parts[partloop]));
+								//System.out.println("Adding path reject: "+parts[partloop]);
+								rejectdirs.add(Pattern.compile(parts[partloop]));
 							}
 						}
 					}
@@ -583,7 +595,7 @@ public class JGet implements DownloadListener
 						{
 							if (parts[partloop].length()>0)
 							{
-								accepthosts.add(escapeRegex(parts[partloop]));
+								accepthosts.add(Pattern.compile(parts[partloop]));
 							}
 						}
 					}
@@ -599,7 +611,7 @@ public class JGet implements DownloadListener
 						{
 							if (parts[partloop].length()>0)
 							{
-								rejecthosts.add(escapeRegex(parts[partloop]));
+								rejecthosts.add(Pattern.compile(parts[partloop]));
 							}
 						}
 					}
