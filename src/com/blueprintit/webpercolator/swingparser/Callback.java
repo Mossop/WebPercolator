@@ -84,6 +84,10 @@ public class Callback extends ParserCallback
 						if (!(value.startsWith("javascript:")||value.startsWith("mailto:")))
 						{
 							value=value.replaceAll(" ","%20");
+							if (value.charAt(0)=='?')
+							{
+								value=base.getPath()+value;
+							}
 							URL newurl = new URL(base,value);
 							Link newlink = new Link(newurl,(LinkType)taglinktypes.get(tag));
 							if (!links.contains(newlink))
