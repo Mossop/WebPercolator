@@ -45,8 +45,8 @@ public class DownloadQueue
 	public DownloadQueue()
 	{
 		cancompare=true;
-		inprogress = Collections.synchronizedMap(new HashMap());
-		queue = Collections.synchronizedList(new LinkedList());
+		inprogress = new HashMap();
+		queue = new LinkedList();
 		listeners = new LinkedList();
 		running=false;
 		manager = new MultiThreadedHttpConnectionManager();
@@ -98,30 +98,32 @@ public class DownloadQueue
 	
 	void processDownloadEvent(DownloadEvent ev)
 	{
+		List list;
 		synchronized(listeners)
 		{
-			Iterator loop = listeners.iterator();
-			while (loop.hasNext())
+			list = new LinkedList(listeners);
+		}
+		Iterator loop = list.iterator();
+		while (loop.hasNext())
+		{
+			DownloadListener listener = (DownloadListener)loop.next();
+			switch (ev.getType())
 			{
-				DownloadListener listener = (DownloadListener)loop.next();
-				switch (ev.getType())
-				{
-					case DownloadEvent.DOWNLOAD_STARTED:
-						listener.downloadStarted(ev);
-						break;
-					case DownloadEvent.DOWNLOAD_UPDATE:
-						listener.downloadUpdate(ev);
-						break;
-					case DownloadEvent.DOWNLOAD_COMPLETE:
-						listener.downloadComplete(ev);
-						break;
-					case DownloadEvent.DOWNLOAD_FAILED:
-						listener.downloadFailed(ev);
-						break;
-					case DownloadEvent.DOWNLOAD_REDIRECTED:
-						listener.downloadRedirected(ev);
-						break;
-				}
+				case DownloadEvent.DOWNLOAD_STARTED:
+					listener.downloadStarted(ev);
+					break;
+				case DownloadEvent.DOWNLOAD_UPDATE:
+					listener.downloadUpdate(ev);
+					break;
+				case DownloadEvent.DOWNLOAD_COMPLETE:
+					listener.downloadComplete(ev);
+					break;
+				case DownloadEvent.DOWNLOAD_FAILED:
+					listener.downloadFailed(ev);
+					break;
+				case DownloadEvent.DOWNLOAD_REDIRECTED:
+					listener.downloadRedirected(ev);
+					break;
 			}
 		}
 		if (ev.getDownload() instanceof DownloadListener)
@@ -151,10 +153,15 @@ public class DownloadQueue
 			case DownloadEvent.DOWNLOAD_COMPLETE:
 			case DownloadEvent.DOWNLOAD_FAILED:
 			case DownloadEvent.DOWNLOAD_REDIRECTED:
-				inprogress.remove(ev.getDownload());
-				checkWaiting();
+				downloadComplete(ev.getDownload());
 				break;
 		}
+	}
+	
+	private synchronized void downloadComplete(Download download)
+	{
+		inprogress.remove(download);
+		checkWaiting();
 	}
 	
 	public void complete()
