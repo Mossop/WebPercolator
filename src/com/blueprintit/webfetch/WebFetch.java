@@ -422,7 +422,7 @@ public class WebFetch
 	public static void main(String[] args)
 	{
 		Configuration config = null;
-		Collection urls = new LinkedList();
+		Collection environments = new LinkedList();
 		for (int loop=0; loop<args.length; loop++)
 		{
 			boolean used=false;
@@ -443,7 +443,7 @@ public class WebFetch
 				try
 				{
 					URL url = new URL(args[loop]);
-					urls.add(url);
+					environments.add(new Environment(url));
 				}
 				catch (MalformedURLException e)
 				{
@@ -454,13 +454,11 @@ public class WebFetch
 		if (config!=null)
 		{
 			WebFetch wf = new WebFetch(config);
-			urls.addAll(config.getURLs());
-			Collection environments = new LinkedList();
-			Iterator loop = urls.iterator();
+			environments.addAll(config.getEnvironments());
+			Iterator loop = environments.iterator();
 			while (loop.hasNext())
 			{
-				URL url = (URL)loop.next();
-				Environment env = new Environment(url);
+				Environment env = (Environment)loop.next();
 				wf.addEnvironmentForDecision(env);
 			}
 			wf.start();

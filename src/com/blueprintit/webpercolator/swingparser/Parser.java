@@ -22,6 +22,11 @@ import com.blueprintit.webpercolator.HtmlLinkParser;
  */
 public class Parser extends HTMLEditorKit implements HtmlLinkParser
 {
+	/**
+	 * Comment for <code>serialVersionUID</code>
+	 */
+	private static final long serialVersionUID = 3545520586416730425L;
+
 	public Parser()
 	{
 	}

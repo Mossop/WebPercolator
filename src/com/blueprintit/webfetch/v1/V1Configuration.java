@@ -30,7 +30,7 @@ import com.blueprintit.webpercolator.URLBuilder;
  */
 public class V1Configuration extends ConfigurationSet implements Configuration
 {
-	private List urls;
+	private List environments;
 	private List authdetails;
 	private List cookies;
 	
@@ -38,15 +38,15 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 	{
 		super();
 		setCascadingSetting("basedir",base);
-		urls = new ArrayList();
+		environments = new ArrayList();
 		cookies = new ArrayList();
 		authdetails = new ArrayList();
 		parseConfig(element);
 	}
 	
-	public Collection getURLs()
+	public Collection getEnvironments()
 	{
-		return urls;
+		return environments;
 	}
 
 	public boolean parseSubElement(Element element) throws ConfigurationParseException
@@ -55,8 +55,16 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 		{
 			try
 			{
-				urls.add(new URL(getElementText(element)));
-				return true;
+				if (element.hasAttribute("referer"))
+				{
+					environments.add(new Environment(new URL(getElementText(element)),new URL(element.getAttribute("referer"))));
+					return true;
+				}
+				else
+				{
+					environments.add(new Environment(new URL(getElementText(element))));
+					return true;
+				}
 			}
 			catch (MalformedURLException e)
 			{
@@ -69,6 +77,11 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 			{
 				try
 				{
+					URL referer = null;
+					if (element.hasAttribute("referer"))
+					{
+						referer=new URL(element.getAttribute("referer"));
+					}
 					int width = 1;
 					if (element.hasAttribute("padding"))
 					{
@@ -84,7 +97,7 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 						{
 							number="0"+number;
 						}
-						urls.add(new URL(base.replaceAll("#",number)));
+						environments.add(new Environment(new URL(base.replaceAll("#",number)),referer));
 					}
 					return true;
 				}

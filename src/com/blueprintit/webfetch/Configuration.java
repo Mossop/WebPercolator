@@ -15,7 +15,7 @@ import org.apache.commons.httpclient.HttpState;
  */
 public interface Configuration
 {
-	public Collection getURLs();
+	public Collection getEnvironments();
 	
 	public void initialiseHttpState(HttpState state);
 	
