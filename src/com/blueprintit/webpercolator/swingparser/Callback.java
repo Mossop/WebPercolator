@@ -34,6 +34,7 @@ public class Callback extends ParserCallback
 		specifyLinkType(HTML.Tag.FRAME, HTML.Attribute.SRC,  Download.FRAME_DOWNLOAD);
 		specifyLinkType(HTML.Tag.LINK,  HTML.Attribute.HREF, Download.UNSPECIFIED_DOWNLOAD);
 		specifyLinkType(HTML.Tag.INPUT, HTML.Attribute.SRC,  Download.IMAGE_DOWNLOAD);
+		specifyLinkType(HTML.Tag.AREA,  HTML.Attribute.HREF, Download.LINK_DOWNLOAD);
 	}
 	
 	public void specifyLinkType(HTML.Tag tag, HTML.Attribute attr, int type)
