@@ -43,12 +43,12 @@ public class ParsingThread implements Runnable
 		wake();
 	}
 	
-	public void wake()
+	public synchronized void wake()
 	{
 		notify();
 	}
 	
-	public void sleep()
+	private synchronized void sleep()
 	{
 		webfetch.registerSleepingParser(this);
 		try

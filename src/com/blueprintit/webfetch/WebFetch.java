@@ -42,6 +42,7 @@ public class WebFetch implements DownloadListener
 	
 	private Map filecache;
 	private Set urlcache;
+	private Set initialurlcache;
 	
 	private List awaitingDecision;
 	private List awaitingParse;
@@ -58,6 +59,7 @@ public class WebFetch implements DownloadListener
 		queue.addDownloadListener(this);
 		queue.setMaxDownloads(5);
 		
+		initialurlcache = new HashSet();
 		urlcache = new HashSet();
 		filecache = new HashMap();
 		
@@ -69,11 +71,11 @@ public class WebFetch implements DownloadListener
 		awaitingParse = new LinkedList();
 		
 		HtmlLinkParser parser = queue.getLinkParser();
-		for (int loop=0; loop<2; loop++)
+		for (int loop=0; loop<100; loop++)
 		{
 			(new DecisionThread(this,config)).start();
 		}
-		for (int loop=0; loop<2; loop++)
+		for (int loop=0; loop<10; loop++)
 		{
 			(new ParsingThread(this,parser)).start();
 		}
@@ -129,17 +131,18 @@ public class WebFetch implements DownloadListener
 	
 	public void addEnvironmentForDecision(Environment env)
 	{
-		synchronized(urlcache)
+		synchronized(initialurlcache)
 		{
-			if (urlcache.contains(env.getTarget()))
+			if (initialurlcache.contains(env.getTarget()))
 			{
 				return;
 			}
-			urlcache.add(env.getTarget());
+			initialurlcache.add(env.getTarget());
 		}
 		synchronized(awaitingDecision)
 		{
 			awaitingDecision.add(env);
+			//log.info("Decision queue is "+awaitingDecision.size());
 		}
 		wakeDecider();
 	}
@@ -162,6 +165,7 @@ public class WebFetch implements DownloadListener
 		synchronized(awaitingParse)
 		{
 			awaitingParse.add(details);
+			//log.info("Parsing queue is "+awaitingParse.size());
 		}
 		wakeParser();
 	}
@@ -228,12 +232,21 @@ public class WebFetch implements DownloadListener
 	
 	public void addEnvironmentToDownload(Environment env)
 	{
+		synchronized(urlcache)
+		{
+			if (urlcache.contains(env.getTarget()))
+			{
+				return;
+			}
+			urlcache.add(env.getTarget());
+		}
 		if (env.getFile()==null)
 		{
 			if (env.isParsing())
 			{
-				System.out.println("Added: "+env.getTarget());
+				//System.out.println("Added: "+env.getTarget());
 				queue.add(new EnvironmentDownload(env));
+				queue.start();
 			}
 			else
 			{
@@ -247,7 +260,10 @@ public class WebFetch implements DownloadListener
 			{
 				if (filecache.containsKey(target))
 				{
-					filecache.put(target,Boolean.TRUE);
+					if (env.isParsing())
+					{
+						filecache.put(target,Boolean.TRUE);
+					}
 					return;
 				}
 				if ((!target.exists())||(env.isOverwriting()))
@@ -255,8 +271,9 @@ public class WebFetch implements DownloadListener
 					File parent = target.getParentFile();
 					if ((parent.isDirectory())||((checkDirectory(parent))&&(parent.mkdirs())))
 					{
-						System.out.println("Added: "+env.getTarget());
-						queue.add(new EnvironmentDownload(env));			
+						//System.out.println("Added: "+env.getTarget());
+						queue.add(new EnvironmentDownload(env));
+						queue.start();
 						filecache.put(target,Boolean.valueOf(env.isParsing()));
 					}
 					else

@@ -33,12 +33,12 @@ public class DecisionThread implements Runnable
 		wake();
 	}
 	
-	public void wake()
+	public synchronized void wake()
 	{
 		notify();
 	}
 	
-	public void sleep()
+	private synchronized void sleep()
 	{
 		webfetch.registerSleepingDecider(this);
 		try
