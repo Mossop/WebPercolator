@@ -28,6 +28,7 @@ public class GetDownload implements DownloadListener, Download
 	private URL referer;
 	private File local;
 	private GetMethod method;
+	private String useragent;
 	private static final String USERAGENT = "Mozilla/4.0 (compatible; Java; HttpClient; en-US) WebPercolator/1.0";
 	
 	public GetDownload(String url, File local) throws MalformedURLException
@@ -51,6 +52,7 @@ public class GetDownload implements DownloadListener, Download
 		this.url=url;
 		this.referer=referer;
 		this.local=local;
+		this.useragent=useragent;
 		method = new GetMethod(url.toString());
 		if (referer!=null)
 		{
@@ -176,6 +178,7 @@ public class GetDownload implements DownloadListener, Download
 			{
 				method.setRequestHeader("Referer",referer.toString());
 			}
+			method.setRequestHeader("User-Agent",useragent);
 			queue.executeMethod(method);
 			return new DownloadDetails(method);
 		}
@@ -270,6 +273,12 @@ public class GetDownload implements DownloadListener, Download
 		}
 	}
 	
+	public void setUserAgent(String useragent)
+	{
+		this.useragent=useragent;
+		method.setRequestHeader("User-Agent",useragent);
+	}
+	
 	/**
 	 * @param url The url to set.
 	 */
@@ -281,5 +290,6 @@ public class GetDownload implements DownloadListener, Download
 		{
 			method.setRequestHeader("Referer",referer.toString());
 		}
+		method.setRequestHeader("User-Agent",useragent);
 	}
 }
