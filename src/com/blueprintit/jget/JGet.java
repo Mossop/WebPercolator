@@ -50,6 +50,7 @@ public class JGet implements DownloadListener
 	private Map downloadparents;
 	private Map downloadrecurses;
 	private File basedir;
+	private String useragent = "Mozilla/4.0 (compatible; Java; en-US) HttpClient JGet/1.0";
 	private Collection urlcache;
 	private Collection filecache;
 	private Collection acceptfiles;
@@ -291,7 +292,7 @@ public class JGet implements DownloadListener
 			referer=parent.getURL();
 		}
 		
-		GetDownload download = new GetDownload(url,local,referer);
+		GetDownload download = new GetDownload(url,local,referer,useragent);
 
 		urlcache.add(url);
 		filecache.add(local);
@@ -462,6 +463,8 @@ public class JGet implements DownloadListener
 
 		options.addOption(OptionBuilder.withLongOpt("threads").hasArg().withArgName("number").withDescription("The number of connections to use").create());
 
+		options.addOption("U","user-agent",false,"Sets the user agent used to retrievals.");
+
 		try
 		{
 			commandline = parser.parse(options,args);
@@ -476,6 +479,11 @@ public class JGet implements DownloadListener
 			}
 			else
 			{
+				if (commandline.hasOption("U"))
+				{
+					useragent=commandline.getOptionValue("U");
+				}
+				
 				if (commandline.hasOption("B"))
 				{
 					try

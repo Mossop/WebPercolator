@@ -28,6 +28,7 @@ public class GetDownload implements DownloadListener, Download
 	private URL referer;
 	private File local;
 	private GetMethod method;
+	private static final String USERAGENT = "Mozilla/4.0 (compatible; Java; HttpClient; en-US) WebPercolator/1.0";
 	
 	public GetDownload(String url, File local) throws MalformedURLException
 	{
@@ -41,6 +42,11 @@ public class GetDownload implements DownloadListener, Download
 	
 	public GetDownload(URL url, File local, URL referer)
 	{
+		this(url,local,referer,USERAGENT);
+	}
+	
+	public GetDownload(URL url, File local, URL referer, String useragent)
+	{
 		listeners = new LinkedList();
 		this.url=url;
 		this.referer=referer;
@@ -50,6 +56,7 @@ public class GetDownload implements DownloadListener, Download
 		{
 			method.setRequestHeader("Referer",referer.toString());
 		}
+		method.setRequestHeader("User-Agent",useragent);
 	}
 	
 	public void addDownloadListener(DownloadListener l)
