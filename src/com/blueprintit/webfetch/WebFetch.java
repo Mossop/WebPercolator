@@ -39,6 +39,9 @@ import com.blueprintit.webpercolator.QueueEvent;
 
 public class WebFetch
 {
+	private static final int PARSERS = 10;
+	private static final int DECIDERS = 100;
+
 	private Configuration config;
 	private DownloadQueue queue;
 	
@@ -141,12 +144,12 @@ public class WebFetch
 		deciders=0;
 		
 		HtmlLinkParser parser = queue.getLinkParser();
-		for (int loop=0; loop<100; loop++)
+		for (int loop=0; loop<DECIDERS; loop++)
 		{
 			(new DecisionThread(this,config,urlcache,filecache)).start();
 			deciders++;
 		}
-		for (int loop=0; loop<10; loop++)
+		for (int loop=0; loop<PARSERS; loop++)
 		{
 			(new ParsingThread(this,parser)).start();
 			parsers++;
