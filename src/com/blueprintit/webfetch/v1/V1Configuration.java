@@ -110,13 +110,10 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 				}
 				catch (MalformedURLException e)
 				{
-					throw new ConfigurationParseException("Invalid url specified for cookie");
+					throw new ConfigurationParseException("Invalid url specified for cookie",e);
 				}
 				cookie.setDomain(url.getHost());
-				if (url.getPath().length()>1)
-				{
-					cookie.setPath(url.getPath());
-				}
+				cookie.setPath(url.getPath());
 				NodeList list = element.getElementsByTagName("Name");
 				if (list.getLength()==1)
 				{
@@ -137,6 +134,10 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 				}
 				cookies.add(cookie);
 				return true;
+			}
+			else
+			{
+				throw new ConfigurationParseException("Cookie must have a url attribute");
 			}
 		}
 		return super.parseSubElement(element);

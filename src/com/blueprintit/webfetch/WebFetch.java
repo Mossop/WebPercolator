@@ -47,6 +47,8 @@ public class WebFetch implements DownloadListener
 	{
 		this.config=config;
 		queue = new DownloadQueue();
+		queue.addDownloadListener(this);
+		queue.setMaxDownloads(5);
 		urlcache = Collections.synchronizedSet(new HashSet());
 		config.initialiseHttpState(queue.getHttpState());
 	}
@@ -78,12 +80,10 @@ public class WebFetch implements DownloadListener
 	{
 		if (dir.isDirectory())
 		{
-			log.info("isDirectory "+dir);
 			return true;
 		}
 		else if (dir.exists())
 		{
-			log.info("exists "+dir);
 			return false;
 		}
 		else
@@ -104,6 +104,7 @@ public class WebFetch implements DownloadListener
 				{
 					if (env.isParsing())
 					{
+						System.out.println("Added: "+env.getTarget());
 						queue.add(new EnvironmentDownload(env));
 					}
 					else
@@ -118,6 +119,7 @@ public class WebFetch implements DownloadListener
 						File parent = env.getFile().getParentFile();
 						if ((parent.isDirectory())||((checkDirectory(parent))&&(parent.mkdirs())))
 						{
+							System.out.println("Added: "+env.getTarget());
 							queue.add(new EnvironmentDownload(env));							
 						}
 						else
@@ -127,6 +129,7 @@ public class WebFetch implements DownloadListener
 					}
 					else if (env.isParsing())
 					{
+						//System.out.println("Parsing local: "+env.getTarget());
 						parse(env.getTarget(),env.getFile());
 					}
 				}
@@ -276,7 +279,7 @@ public class WebFetch implements DownloadListener
 		EnvironmentDownload download = (EnvironmentDownload)e.getDownload();
 		if (download.isParsable())
 		{
-			parse(download.getURL(),download.getLocalFile());
+			parse(download.getURL(),e.getLocalFile());
 		}
 	}
 

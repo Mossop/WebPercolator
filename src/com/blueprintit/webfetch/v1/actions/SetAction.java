@@ -6,6 +6,7 @@
  */
 package com.blueprintit.webfetch.v1.actions;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -43,7 +44,16 @@ public class SetAction extends AbstractAction implements Condition
 		String text = getText(env);
 		if ((regexReplace!=null)&&(regex!=null))
 		{
-			text=regex.matcher(text).replaceFirst(regexReplace);
+			Matcher matcher = regex.matcher(text);
+			if (matcher.find())
+			{
+				text=text.substring(matcher.start(),matcher.end());
+				text=regex.matcher(text).replaceAll(regexReplace);
+			}
+			else
+			{
+				text="";
+			}
 		}
 		String script = target+"=\""+text+"\"";
 		env.execute(script,type);

@@ -115,7 +115,7 @@ public class ConditionGroup extends ElementConfigParser implements ConditionSet
 					}
 				}
 			}
-			return true;
+			return matchAll;
 		}
 	}
 	

@@ -17,26 +17,48 @@ import java.util.regex.Pattern;
 public class URLBuilder
 {
 	private String url;
+	private String user = null;
+	private String pass = null;
 	private String scheme = "http";
 	private String host = "localhost";
 	private String path = "/";
 	private String query = null;
 	private int port = -1;
+	private String fragment;
 	
-	private static final String XALPHA_REGEX = "[\\p{Alnum}$_@&!\"',\\-\\(\\)\\+\\*]|%\\p{XDigit}{2}";
+	private static Pattern SCHEME_REGEX;
+	private static Pattern HOST_REGEX;
+	private static Pattern PATH_REGEX;
+	private static Pattern URL_REGEX;
+	private static Pattern QUERY_REGEX;
+	private static Pattern FRAGMENT_REGEX;
 	
-	private static final String HOST_PART = "\\p{Alpha}(?:"+XALPHA_REGEX+")*?";
+	static
+	{		
+		String scheme = "(http|https)";
+		SCHEME_REGEX = Pattern.compile(scheme);
+		
+		String userinfo = "([^@]*)";
 
-	private static final String NAMEDHOST_REGEX = HOST_PART+"(?:\\."+HOST_PART+")*";
-	private static final String NUMBEREDHOST_REGEX = "\\d{1,3}(?:\\.\\d{1,3}){3}";
-	
-	private static final String HOST_REGEX = NUMBEREDHOST_REGEX+"|"+NAMEDHOST_REGEX;
-	private static final String SCHEME_REGEX = "http|https"; // Not using ftp: +"ftp";
-	private static final String PATH_REGEX = "(?:/(?:"+XALPHA_REGEX+"|\\.)*)*";
-	private static final String QUERY_REGEX = "(?:"+XALPHA_REGEX+")*";
-	private static final String FRAGMENT_REGEX = "(?:"+XALPHA_REGEX+")*";
-	
-	private static final String URL_REGEX = "("+SCHEME_REGEX+")://("+HOST_REGEX+")("+PATH_REGEX+")(?:\\?("+QUERY_REGEX+"))?(?:#("+FRAGMENT_REGEX+"))?";
+		String port = "(\\d{1,5})";
+		
+		String host = "([^/?#]*)";
+		HOST_REGEX = Pattern.compile(host);
+		
+		String path = "(/(?:[^\\?#])*)*";
+		PATH_REGEX = Pattern.compile(path);
+		
+		String query="([^#]*)";
+		QUERY_REGEX = Pattern.compile(query);
+		
+		String fragment = "(.*)";
+		FRAGMENT_REGEX = Pattern.compile(fragment);
+		
+		String url = scheme+"://(?:"+userinfo+"@)?"+host+"(?::"+port+")?"+path+"(?:\\?"+query+")?(?:#"+fragment+")?";
+		URL_REGEX = Pattern.compile(url);
+		
+		//System.err.println(url);
+	}
 	
 	public URLBuilder(String url) throws MalformedURLException
 	{
@@ -55,18 +77,23 @@ public class URLBuilder
 	
 	public void setUrl(String url) throws MalformedURLException
 	{
-		Pattern urlsplit = Pattern.compile("^"+URL_REGEX+"$");
-		Matcher matcher = urlsplit.matcher(url);
+		Matcher matcher = URL_REGEX.matcher(url);
 		if (matcher.matches())
 		{
 			scheme=matcher.group(1);
-			host=matcher.group(2);
-			path=matcher.group(3);
-			if (path.length()==0)
+			user=matcher.group(2);
+			host=matcher.group(3);
+			if (matcher.group(4)!=null)
+			{
+				port = Integer.parseInt(matcher.group(4));
+			}
+			path=matcher.group(5);
+			if ((path==null)||(path.length()==0))
 			{
 				path="/";
 			}
-			query=matcher.group(4);
+			query=matcher.group(6);
+			fragment=matcher.group(7);
 		}
 		else
 		{
@@ -79,6 +106,10 @@ public class URLBuilder
 		scheme=url.getProtocol();
 		port=url.getPort();
 		path=url.getPath();
+		if (!path.startsWith("/"))
+		{
+			path="/"+path;
+		}
 		query=url.getQuery();
 		host=url.getHost();
 	}
@@ -105,7 +136,7 @@ public class URLBuilder
 		String querytext = "";
 		if ((query!=null)&&(query.length()>0))
 		{
-			querytext="?"+querytext;
+			querytext="?"+query;
 		}
 		return scheme+"://"+host+porttext+path+querytext;
 	}
@@ -117,7 +148,7 @@ public class URLBuilder
 	
 	public void setHost(String host) throws  MalformedURLException
 	{
-		if (host.matches("^"+HOST_REGEX+"$"))
+		if (HOST_REGEX.matcher(host).matches())
 		{
 			this.host=host;
 		}
@@ -134,7 +165,7 @@ public class URLBuilder
 	
 	public void setPath(String path) throws  MalformedURLException
 	{
-		if (path.matches("^"+PATH_REGEX+"$"))
+		if (PATH_REGEX.matcher(path).matches())
 		{
 			this.path=path;
 		}
@@ -161,7 +192,7 @@ public class URLBuilder
 	
 	public void setQuery(String query) throws  MalformedURLException
 	{
-		if (query.matches("^"+QUERY_REGEX+"$"))
+		if (QUERY_REGEX.matcher(query).matches())
 		{
 			this.query=query;
 		}
@@ -178,7 +209,7 @@ public class URLBuilder
 	
 	public void setScheme(String scheme) throws  MalformedURLException
 	{
-		if (scheme.matches("^"+SCHEME_REGEX+"$"))
+		if (SCHEME_REGEX.matcher(scheme).matches())
 		{
 			this.scheme=scheme;
 		}

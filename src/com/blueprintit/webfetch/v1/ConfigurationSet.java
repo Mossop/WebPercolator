@@ -44,12 +44,6 @@ public class ConfigurationSet extends Block
 		patterns = new LinkedList();
 	}
 	
-	ConfigurationSet(Element element) throws ConfigurationParseException
-	{
-		this();
-		parseConfig(element);
-	}
-	
 	ConfigurationSet(ConfigurationSet parent, Element element) throws ConfigurationParseException
 	{
 		this();
@@ -218,6 +212,7 @@ public class ConfigurationSet extends Block
 			{
 				throw new ConfigurationParseException("A policy must be set with the default element.");
 			}
+			return true;
 		}
 		return super.parseSubElement(element);
 	}
