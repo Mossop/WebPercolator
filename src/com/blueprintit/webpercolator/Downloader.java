@@ -42,7 +42,7 @@ public class Downloader implements Runnable
 	 */
 	public void run()
 	{
-		queue.processDownloadEvent(new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_STARTED));
+		queue.processDownloadEvent(new DownloadEvent(queue,download,DownloadEvent.DOWNLOAD_STARTED));
 		HttpMethod method = download.getHttpMethod();
 		try
 		{
@@ -66,21 +66,21 @@ public class Downloader implements Runnable
 						out.close();
 						in.close();
 						method.releaseConnection();
-						queue.processDownloadEvent(new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_COMPLETE));
+						queue.processDownloadEvent(new DownloadEvent(queue,download,DownloadEvent.DOWNLOAD_COMPLETE));
 					}
 					catch (IOException e)
 					{
 						e.printStackTrace();
 						method.releaseConnection();
 						out.close();
-						queue.processDownloadEvent(new DownloadEvent(queue,this,download,e));
+						queue.processDownloadEvent(new DownloadEvent(queue,download,e));
 					}
 				}
 				catch (IOException e) // Thrown when the file could not be opened for writing.
 				{
 					e.printStackTrace();
 					method.releaseConnection();
-					queue.processDownloadEvent(new DownloadEvent(queue,this,download,e));
+					queue.processDownloadEvent(new DownloadEvent(queue,download,e));
 				}
 			}
 			else if ((method.getStatusCode()>=300)&&(method.getStatusCode()<400))
@@ -88,25 +88,25 @@ public class Downloader implements Runnable
 				URL redirect = new URL(method.getResponseHeader("Location").getValue());
 				System.out.println("Redirect to: "+redirect.toString());
 				method.releaseConnection();
-				queue.processDownloadEvent(new DownloadEvent(queue,this,download,redirect));
+				queue.processDownloadEvent(new DownloadEvent(queue,download,redirect));
 			}
 			else
 			{
 				method.releaseConnection();
-				queue.processDownloadEvent(new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_FAILED));
+				queue.processDownloadEvent(new DownloadEvent(queue,download,DownloadEvent.DOWNLOAD_FAILED));
 			}
 		}
 		catch (HttpException e)
 		{
 			e.printStackTrace();
 			method.releaseConnection();
-			queue.processDownloadEvent(new DownloadEvent(queue,this,download,e));
+			queue.processDownloadEvent(new DownloadEvent(queue,download,e));
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 			method.releaseConnection();
-			queue.processDownloadEvent(new DownloadEvent(queue,this,download,e));
+			queue.processDownloadEvent(new DownloadEvent(queue,download,e));
 		}
 		running=false;
 	}

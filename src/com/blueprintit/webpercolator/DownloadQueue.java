@@ -16,6 +16,8 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
+import com.blueprintit.webpercolator.swingparser.Parser;
+
 /**
  * @author Dave
  */
@@ -29,6 +31,7 @@ public class DownloadQueue
 	private int maxdownloads;
 	private HttpClient agent;
 	private List listeners;
+	private HtmlLinkParser parser;
 	
 	public DownloadQueue()
 	{
@@ -40,6 +43,12 @@ public class DownloadQueue
 		MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
 		agent = new HttpClient(manager);
 		maxdownloads=10;
+		parser = new Parser();
+	}
+	
+	public HtmlLinkParser getLinkParser()
+	{
+		return parser;
 	}
 	
 	public void executeMethod(HttpMethod method) throws HttpException, IOException

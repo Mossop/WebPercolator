@@ -8,7 +8,6 @@ import java.net.URL;
 public class DownloadEvent
 {
 	private DownloadQueue queue;
-	private Downloader downloader;
 	private Download download;
 	private int type;
 	private Exception exception;
@@ -20,23 +19,22 @@ public class DownloadEvent
 	public static final int DOWNLOAD_REDIRECTED = 3;
 	public static final int DOWNLOAD_FAILED = -1;
 	
-	public DownloadEvent(DownloadQueue q, Downloader d, Download r, int type)
+	public DownloadEvent(DownloadQueue q, Download r, int type)
 	{
 		queue=q;
-		downloader=d;
 		download=r;
 		this.type=type;
 	}
 	
-	public DownloadEvent(DownloadQueue q, Downloader d, Download r, Exception e)
+	public DownloadEvent(DownloadQueue q, Download r, Exception e)
 	{
-		this(q,d,r,DOWNLOAD_FAILED);
+		this(q,r,DOWNLOAD_FAILED);
 		exception=e;
 	}
 	
-	public DownloadEvent(DownloadQueue q, Downloader d, Download r, URL u)
+	public DownloadEvent(DownloadQueue q, Download r, URL u)
 	{
-		this(q,d,r,DOWNLOAD_REDIRECTED);
+		this(q,r,DOWNLOAD_REDIRECTED);
 		redirect=u;
 	}
 	
@@ -70,14 +68,6 @@ public class DownloadEvent
 	public Download getDownload()
 	{
 		return download;
-	}
-	
-	/**
-	 * @return Returns the downloader.
-	 */
-	public Downloader getDownloader()
-	{
-		return downloader;
 	}
 	
 	/**
