@@ -23,6 +23,7 @@ public class Block extends ConditionGroup implements ActionSet, ConditionSet
 {
 	private static Map actionmap;
 	private List actions;
+	protected boolean newScope;
 	
 	static
 	{
@@ -32,22 +33,17 @@ public class Block extends ConditionGroup implements ActionSet, ConditionSet
 		actionmap.put("Call","com.blueprintit.webfetch.v1.actions.CallAction");
 		actionmap.put("Log","com.blueprintit.webfetch.v1.actions.LogAction");
 		actionmap.put("Script","com.blueprintit.webfetch.v1.actions.ScriptAction");
-}
-	
-	private Block()
-	{
-		super(true);
-		actions = new ArrayList();
 	}
 	
 	public Block(boolean matchAll)
 	{
 		super(matchAll);
+		actions = new ArrayList();
 	}
 	
 	public Block(Element element) throws ConfigurationParseException
 	{
-		super(true);
+		this(true);
 		parseConfig(element);
 	}
 
@@ -92,5 +88,25 @@ public class Block extends ConditionGroup implements ActionSet, ConditionSet
 			return true;
 		}
 		return super.parseSubElement(element);
+	}
+	
+	public void parseConfig(Element element) throws ConfigurationParseException
+	{
+		if (element.hasAttribute("scope"))
+		{
+			if (element.getAttribute("scope").equals("new"))
+			{
+				newScope=true;
+			}
+			else if (element.getAttribute("scope").equals("current"))
+			{
+				newScope=false;
+			}
+			else
+			{
+				throw new ConfigurationParseException("scope should be new or current");
+			}
+		}
+		super.parseConfig(element);
 	}
 }

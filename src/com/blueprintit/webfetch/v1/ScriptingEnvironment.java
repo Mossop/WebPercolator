@@ -62,6 +62,18 @@ public class ScriptingEnvironment
 		return settings;
 	}
 	
+	public void execute(String script)
+	{
+		try
+		{
+			jsContext.evaluateString(jsScope,script,"",1,null);
+		}
+		catch (JavaScriptException e)
+		{
+			System.err.println("Error executing script");
+		}
+	}
+	
 	public String evaluate(String script)
 	{
 		try

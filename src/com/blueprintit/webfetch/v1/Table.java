@@ -44,7 +44,7 @@ public class Table extends ElementConfigParser implements Action
 			TableRow row = (TableRow)loop.next();
 			if (!row.matches(env))
 			{
-				break;
+				continue;
 			}
 			row.execute(config,env);
 			if (env.isDecided())

@@ -25,9 +25,8 @@ public class ConfigurationSet extends Block
 	private Map tables;
 	private Collection patterns;
 	private Map settings;
-	private boolean newScope;
 	
-	ConfigurationSet(Element element) throws ConfigurationParseException
+	protected ConfigurationSet()
 	{
 		super(true);
 		newScope=true;
@@ -35,13 +34,19 @@ public class ConfigurationSet extends Block
 		settings = new HashMap();
 		configsets = new LinkedList();
 		patterns = new LinkedList();
+	}
+	
+	ConfigurationSet(Element element) throws ConfigurationParseException
+	{
+		this();
 		parseConfig(element);
 	}
 	
 	ConfigurationSet(ConfigurationSet parent, Element element) throws ConfigurationParseException
 	{
-		this(element);
+		this();
 		this.parent=parent;
+		parseConfig(element);
 	}
 
 	private Object getSetting(String name)
@@ -106,26 +111,6 @@ public class ConfigurationSet extends Block
 			return true;
 		}
 		return super.parseSubElement(element);
-	}
-	
-	public void parseConfig(Element element) throws ConfigurationParseException
-	{
-		if (element.hasAttribute("scope"))
-		{
-			if (element.getAttribute("scope").equals("new"))
-			{
-				newScope=true;
-			}
-			else if (element.getAttribute("scope").equals("current"))
-			{
-				newScope=false;
-			}
-			else
-			{
-				throw new ConfigurationParseException("scope should be new or current");
-			}
-		}
-		super.parseConfig(element);
 	}
 	
 	private void doApplyConfigurationSet(ScriptingEnvironment env)

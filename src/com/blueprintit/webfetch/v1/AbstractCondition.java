@@ -30,6 +30,7 @@ public abstract class AbstractCondition extends ElementConfigParser implements C
 		{
 			invert=Boolean.valueOf(element.getAttribute("invert")).booleanValue();
 		}
+		parseCondition(element);
 	}
 
 	public abstract boolean checkForMatch(ScriptingEnvironment env);

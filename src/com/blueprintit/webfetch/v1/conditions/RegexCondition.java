@@ -6,6 +6,7 @@
  */
 package com.blueprintit.webfetch.v1.conditions;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -20,7 +21,10 @@ import com.blueprintit.webfetch.v1.ScriptingEnvironment;
  */
 public class RegexCondition extends AbstractCondition
 {
-	String target = "target";
+	String target = "download.url";
+	boolean all=false;
+	boolean any=true;
+	boolean start=false;
 	Pattern pattern;
 	
 	public void parseCondition(Element element) throws ConfigurationParseException
@@ -28,6 +32,26 @@ public class RegexCondition extends AbstractCondition
 		if (element.hasAttribute("target"))
 		{
 			target = element.getAttribute("target");
+		}
+		if (element.hasAttribute("match"))
+		{
+			any=false;
+			if (element.getAttribute("match").equals("any"))
+			{
+				any=true;
+			}
+			else if (element.getAttribute("match").equals("all"))
+			{
+				all=true;
+			}
+			else if (element.getAttribute("match").equals("start"))
+			{
+				start=true;
+			}
+			else
+			{
+				throw new ConfigurationParseException("Invalid setting for match");
+			}
 		}
 		String text = getElementText(element);
 		if (text.length()==0)
@@ -46,7 +70,21 @@ public class RegexCondition extends AbstractCondition
 
 	public boolean checkForMatch(ScriptingEnvironment env)
 	{
-		return pattern.matcher(env.evaluate(target)).matches();
+		boolean result;
+		Matcher matcher = pattern.matcher(env.evaluate(target));
+		if (any)
+		{
+			return matcher.find();
+		}
+		if (all)
+		{
+			return matcher.matches();
+		}
+		if (start)
+		{
+			return matcher.lookingAt();
+		}
+		return false;
 	}
 
 }

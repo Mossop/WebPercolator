@@ -33,6 +33,6 @@ public class ScriptAction extends ElementConfigParser implements Action
 	
 	public void execute(ConfigurationSet config, ScriptingEnvironment env)
 	{
-		env.evaluate(content);
+		env.execute(content);
 	}
 }

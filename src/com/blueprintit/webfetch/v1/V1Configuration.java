@@ -6,8 +6,11 @@
  */
 package com.blueprintit.webfetch.v1;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.w3c.dom.Element;
 
@@ -20,16 +23,37 @@ import com.blueprintit.webfetch.Environment;
  */
 public class V1Configuration extends ConfigurationSet implements Configuration
 {
+	private List urls;
+	
 	public V1Configuration(Element element) throws ConfigurationParseException
 	{
-		super(element);
+		super();
+		urls = new ArrayList();
+		parseConfig(element);
 	}
 	
 	public Collection getURLs()
 	{
-		return new ArrayList();
+		return urls;
 	}
 
+	public boolean parseSubElement(Element element) throws ConfigurationParseException
+	{
+		if (element.getNodeName().equals("Url"))
+		{
+			try
+			{
+				urls.add(new URL(getElementText(element)));
+				return true;
+			}
+			catch (MalformedURLException e)
+			{
+				throw new ConfigurationParseException("Illegal url",e);
+			}
+		}
+		return super.parseSubElement(element);
+	}
+	
 	public void applyConfiguration(Environment env)
 	{
 		ScriptingEnvironment scope = new ScriptingEnvironment(env);
