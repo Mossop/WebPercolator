@@ -42,6 +42,7 @@ public class JGet implements DownloadListener
 	private Map downloadrecurses;
 	private File basedir;
 	private Collection urlcache;
+	private Collection filecache;
 	
 	public JGet(String[] args) throws FileNotFoundException, IOException
 	{
@@ -51,6 +52,7 @@ public class JGet implements DownloadListener
 		downloadparents = Collections.synchronizedMap(new HashMap());
 		downloadrecurses = Collections.synchronizedMap(new HashMap());
 		urlcache = Collections.synchronizedCollection(new LinkedList());
+		filecache = Collections.synchronizedCollection(new LinkedList());
 		parseArguments(args);
 	}
 	
@@ -147,8 +149,30 @@ public class JGet implements DownloadListener
 		file=file.replace('*','_');
 		file=file.replace('?','_');
 		
-		//System.out.println("Planning to store "+url+" at "+basedir+" "+file);
-		return new File(basedir,file);
+		File aim = new File(basedir,file);
+		if ((aim.exists())||(filecache.contains(aim)))
+		{
+			if (commandline.hasOption("r"))
+			{
+				if (commandline.hasOption("nc"))
+				{
+					return null;
+				}
+			}
+			else
+			{
+				if (!commandline.hasOption("nc"))
+				{
+					int suffix=0;
+					while ((aim.exists())||(filecache.contains(aim)))
+					{
+						suffix++;
+						aim = new File(basedir,file+"."+suffix);
+					}
+				}
+			}
+		}
+		return aim;
 	}
 	
 	public synchronized void submitURL(URL url, Download parent, int recursedepth, int type)
@@ -167,6 +191,7 @@ public class JGet implements DownloadListener
 		}
 		
 		urlcache.add(url);
+		filecache.add(local);
 		
 		Download download = new GetDownload(url,local,type,referer);
 		download.getHttpMethod().setFollowRedirects(false);

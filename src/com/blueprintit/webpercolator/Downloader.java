@@ -18,6 +18,7 @@ public class Downloader implements Runnable
 	private Download download;
 	private DownloadQueue queue;
 	private boolean running;
+	private File target;
 	
 	/**
 	 * @param r
@@ -38,6 +39,11 @@ public class Downloader implements Runnable
 		}
 	}
 	
+	public File getFile()
+	{
+		return target;
+	}
+	
 	/**
 	 * @see java.lang.Runnable#run()
 	 */
@@ -52,7 +58,7 @@ public class Downloader implements Runnable
 			{
 				try
 				{
-					File target = download.getLocalFile();
+					target = download.getLocalFile();
 					if (target==null)
 					{
 						target = File.createTempFile("dqtemp",null);
@@ -93,7 +99,7 @@ public class Downloader implements Runnable
 			else if ((method.getStatusCode()>=300)&&(method.getStatusCode()<400))
 			{
 				URL redirect = new URL(method.getResponseHeader("Location").getValue());
-				System.out.println("Redirect to: "+redirect.toString());
+				//System.out.println("Redirect to: "+redirect.toString());
 				method.releaseConnection();
 				queue.processDownloadEvent(new DownloadEvent(queue,download,redirect));
 			}

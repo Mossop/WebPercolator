@@ -35,7 +35,6 @@ public class DownloadQueue
 	{
 		inprogress = Collections.synchronizedMap(new HashMap());
 		queue = Collections.synchronizedList(new LinkedList());
-		cache = Collections.synchronizedMap(new HashMap());
 		listeners = new LinkedList();
 		running=false;
 		manager = new MultiThreadedHttpConnectionManager();
@@ -172,14 +171,37 @@ public class DownloadQueue
 	
 	private synchronized void checkWaiting()
 	{
-		if (running)
+		if ((running)&&(!abort))
 		{
-			while ((!abort)&&(inprogress.size()<manager.getMaxTotalConnections())&&(queue.size()>0))
+			int pos = 0;
+			while ((inprogress.size()<manager.getMaxTotalConnections())&&(pos<queue.size()))
 			{
-				Download r = (Download)queue.remove(0);
-				Downloader d = new Downloader(this,r);
-				inprogress.put(r,d);
-				d.start();
+				Download r = (Download)queue.get(pos);
+				boolean canstart=true;
+				if ((inprogress.size()>0)&&(r.getLocalFile()!=null))
+				{
+					Iterator loop = inprogress.keySet().iterator();
+					while (loop.hasNext())
+					{
+						Downloader d = (Downloader)loop.next();
+						if (r.getLocalFile().equals(d.getFile()))
+						{
+							canstart=false;
+							break;
+						}
+					}
+				}
+				if (canstart)
+				{
+					queue.remove(pos);					
+					Downloader d = new Downloader(this,r);
+					inprogress.put(r,d);
+					d.start();
+				}
+				else
+				{
+					pos++;
+				}
 			}
 			if (inprogress.size()==0)
 			{
@@ -190,12 +212,8 @@ public class DownloadQueue
 	
 	public synchronized void add(Download r)
 	{
-		if ((r.getLocalFile()==null)||(!cache.containsKey(r.getLocalFile())))
-		{
-			cache.put(r.getLocalFile(),r);
-			queue.add(r);
-			checkWaiting();
-		}
+		queue.add(r);
+		checkWaiting();
 	}
 	
 	public void waitFor()
