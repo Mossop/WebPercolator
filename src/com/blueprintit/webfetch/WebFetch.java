@@ -19,6 +19,11 @@ import com.blueprintit.webfetch.v1.V1ConfigurationParser;
 import com.blueprintit.webpercolator.DownloadQueue;
 
 /**
+ * $Author$
+ * $Source$
+ * $Date$
+ * $Revision$
+ *
  * @author Dave
  */
 public class WebFetch
