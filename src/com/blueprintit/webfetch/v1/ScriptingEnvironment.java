@@ -9,6 +9,7 @@ package com.blueprintit.webfetch.v1;
 /*import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.HashMap;*/
+import java.io.File;
 import java.util.Map;
 
 import org.mozilla.javascript.Context;
@@ -34,14 +35,19 @@ public class ScriptingEnvironment
 	/**
 	 * @param env
 	 */
-	public ScriptingEnvironment(Environment env)
+	public ScriptingEnvironment(File base, Environment env)
 	{
 		this.env=env;
-		settings = new DownloadSettings(env);
+		settings = new DownloadSettings(base,env);
 		jsContext = Context.enter();
 		jsScope = jsContext.initStandardObjects();
 		Scriptable target = jsContext.toObject(settings,jsScope);
 		jsScope.put("download",jsScope,target);
+	}
+	
+	public void setBaseDir(File base)
+	{
+		settings.setBaseDir(base);
 	}
 	
 	public void enterNewScope()

@@ -6,6 +6,7 @@
  */
 package com.blueprintit.webfetch.v1;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -25,9 +26,10 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 {
 	private List urls;
 	
-	public V1Configuration(Element element) throws ConfigurationParseException
+	public V1Configuration(File base, Element element) throws ConfigurationParseException
 	{
 		super();
+		setCascadingSetting("basedir",base);
 		urls = new ArrayList();
 		parseConfig(element);
 	}
@@ -56,7 +58,7 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 	
 	public void applyConfiguration(Environment env)
 	{
-		ScriptingEnvironment scope = new ScriptingEnvironment(env);
+		ScriptingEnvironment scope = new ScriptingEnvironment((File)getSetting("basedir"),env);
 		try
 		{
 			if (matches(scope))

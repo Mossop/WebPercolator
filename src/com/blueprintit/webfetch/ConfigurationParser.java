@@ -6,6 +6,8 @@
  */
 package com.blueprintit.webfetch;
 
+import java.io.File;
+
 import org.w3c.dom.Document;
 
 /**
@@ -13,5 +15,5 @@ import org.w3c.dom.Document;
  */
 public interface ConfigurationParser
 {
-	public Configuration parseConfiguration(Document document) throws ConfigurationParseException;
+	public Configuration parseConfiguration(File base, Document document) throws ConfigurationParseException;
 }

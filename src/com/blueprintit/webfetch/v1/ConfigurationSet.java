@@ -6,6 +6,7 @@
  */
 package com.blueprintit.webfetch.v1;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -72,7 +73,7 @@ public class ConfigurationSet extends Block
 		}
 	}
 	
-	private Object getSetting(String name)
+	protected Object getSetting(String name)
 	{
 		Object result = getLocalSetting(name);
 		if (result!=null)
@@ -95,42 +96,42 @@ public class ConfigurationSet extends Block
 		return localsettings.containsKey(name);
 	}
 	
-	private boolean isSet(String name)
+	protected boolean isSet(String name)
 	{
 		return isLocalSet(name)||isCascadedSet(name);
 	}
 	
-	private void setLocalSetting(String name, boolean value)
+	protected void setLocalSetting(String name, boolean value)
 	{
 		setSetting(name,value,false);
 	}
 
-	private void setCascadingSetting(String name, boolean value)
+	protected void setCascadingSetting(String name, boolean value)
 	{
 		setSetting(name,value,false);
 	}
 
-	private void setLocalSetting(String name, int value)
+	protected void setLocalSetting(String name, int value)
 	{
 		setSetting(name,value,false);
 	}
 
-	private void setCascadingSetting(String name, int value)
+	protected void setCascadingSetting(String name, int value)
 	{
 		setSetting(name,value,false);
 	}
 
-	private void setLocalSetting(String name, Object value)
+	protected void setLocalSetting(String name, Object value)
 	{
 		setSetting(name,value,false);
 	}
 
-	private void setCascadingSetting(String name, Object value)
+	protected void setCascadingSetting(String name, Object value)
 	{
 		setSetting(name,value,false);
 	}
 
-	private void setSetting(String name, Object value, boolean cascading)
+	protected void setSetting(String name, Object value, boolean cascading)
 	{
 		if (cascading)
 		{
@@ -142,31 +143,31 @@ public class ConfigurationSet extends Block
 		}
 	}
 	
-	private void setSetting(String name, boolean value, boolean cascading)
+	protected void setSetting(String name, boolean value, boolean cascading)
 	{
 		setSetting(name,Boolean.valueOf(value),cascading);
 	}
 	
-	private void setSetting(String name, int value, boolean cascading)
+	protected void setSetting(String name, int value, boolean cascading)
 	{
 		setSetting(name,new Integer(value),cascading);
 	}
 	
-	private boolean getBooleanSetting(String name)
+	protected boolean getBooleanSetting(String name)
 	{
 		Object obj = getSetting(name);
 		assert obj instanceof Boolean;
 		return ((Boolean)obj).booleanValue();
 	}
 	
-	private int getIntSetting(String name)
+	protected int getIntSetting(String name)
 	{
 		Object obj = getSetting(name);
 		assert obj instanceof Integer;
 		return ((Integer)obj).intValue();
 	}
 	
-	private String getStringSetting(String name)
+	protected String getStringSetting(String name)
 	{
 		Object obj = getSetting(name);
 		assert obj instanceof String;
@@ -216,6 +217,21 @@ public class ConfigurationSet extends Block
 		return super.parseSubElement(element);
 	}
 	
+	public void parseConfig(Element element) throws ConfigurationParseException
+	{
+		if (element.hasAttribute("basedir"))
+		{
+			File current = (File)getSetting("basedir");
+			File newdir = new File(current,element.getAttribute("basedir"));
+			if (newdir.isDirectory())
+			{
+				throw new ConfigurationParseException("basedir attribute must specify a valid directory");
+			}
+			setCascadingSetting("basedir",current);
+		}
+		super.parseConfig(element);
+	}
+	
 	private void doApplyConfigurationSet(ScriptingEnvironment env)
 	{
 		Table start = findTable("");
@@ -247,6 +263,7 @@ public class ConfigurationSet extends Block
 	{
 		if (newScope)
 			env.enterNewScope();
+		env.setBaseDir((File)getSetting("basedir"));
 		execute(this,env);
 		if (!env.isDecided())
 		{
@@ -259,6 +276,7 @@ public class ConfigurationSet extends Block
 					config.applyConfigurationSet(env);
 					if (env.isDecided())
 						return;
+					env.setBaseDir((File)getSetting("basedir"));
 				}
 			}
 			doApplyConfigurationSet(env);

@@ -7,6 +7,7 @@
 package com.blueprintit.webfetch;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,6 +26,8 @@ import com.blueprintit.webfetch.v1.V1ConfigurationParser;
 import com.blueprintit.webpercolator.DownloadEvent;
 import com.blueprintit.webpercolator.DownloadListener;
 import com.blueprintit.webpercolator.DownloadQueue;
+import com.blueprintit.webpercolator.HtmlLinkParser;
+import com.blueprintit.webpercolator.Link;
 
 public class WebFetch implements DownloadListener
 {
@@ -37,9 +40,27 @@ public class WebFetch implements DownloadListener
 		queue = new DownloadQueue();
 	}
 	
-	private void parse(File file)
+	private void parse(URL base, File file)
 	{
-		
+		if ((file.isFile())&&(file.canRead()))
+		{
+			HtmlLinkParser parser = queue.getLinkParser();
+			try
+			{
+				Collection links = parser.parseLinks(base, new FileReader(file));
+				Iterator loop = links.iterator();
+				while (loop.hasNext())
+				{
+					Link link = (Link)loop.next();
+					Environment newenv = new Environment(link.getUrl(),base);
+					addEnvironment(newenv);
+				}
+			}
+			catch (IOException e)
+			{
+				
+			}
+		}
 	}
 	
 	public void addEnvironment(Environment env)
@@ -53,7 +74,7 @@ public class WebFetch implements DownloadListener
 			}
 			else if (env.isParsing())
 			{
-				parse(env.getFile());
+				parse(env.getTarget(),env.getFile());
 			}
 		}
 	}
@@ -77,6 +98,7 @@ public class WebFetch implements DownloadListener
 			DocumentBuilder builder = dbf.newDocumentBuilder();
 			try
 			{
+				file=file.getCanonicalFile();
 				Document document = builder.parse(file);
 				Element root = document.getDocumentElement();
 				if ((root.getNodeName().equals("WebFetchConfig"))&&(root.hasAttribute("version")))
@@ -94,7 +116,7 @@ public class WebFetch implements DownloadListener
 					}
 					try
 					{
-						return parser.parseConfiguration(document);
+						return parser.parseConfiguration(file.getParentFile(),document);
 					}
 					catch (ConfigurationParseException e)
 					{
@@ -195,15 +217,17 @@ public class WebFetch implements DownloadListener
 
 	public void downloadComplete(DownloadEvent e)
 	{
+		System.out.println(e.getDownload().getURL()+" downloaded to "+e.getLocalFile());
 		EnvironmentDownload download = (EnvironmentDownload)e.getDownload();
 		if (download.isParsable())
 		{
-			parse(download.getLocalFile());
+			parse(download.getURL(),download.getLocalFile());
 		}
 	}
 
 	public void downloadFailed(DownloadEvent e)
 	{
+		System.err.println("Failed to download "+e.getDownload().getURL()+": "+e.getException().getMessage());
 	}
 
 	public void downloadRedirected(DownloadEvent e)
