@@ -40,10 +40,6 @@ public class RegexCondition extends AbstractCondition
 		{
 			target = element.getAttribute("source");
 		}
-		else
-		{
-			throw new ConfigurationParseException("Regex tag must have a source/target");
-		}
 		if (element.hasAttribute("match"))
 		{
 			any=false;

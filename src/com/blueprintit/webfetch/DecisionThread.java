@@ -20,7 +20,7 @@ public class DecisionThread implements Runnable
 {
 	private WebFetch webfetch;
 	private Configuration config;
-	private boolean running;
+	private boolean running = false;
 	private Set urlcache;
 	private Map filecache;
 	
@@ -34,16 +34,21 @@ public class DecisionThread implements Runnable
 		this.config=config;
 	}
 	
-	public void start()
+	public synchronized void start()
 	{
 		running=true;
 		(new Thread(this)).start();		
 	}
 	
-	public void stop()
+	public synchronized void stop()
 	{
 		running=false;
 		wake();
+	}
+	
+	public synchronized boolean isRunning()
+	{
+		return running;
 	}
 	
 	public synchronized void wake()
@@ -80,75 +85,80 @@ public class DecisionThread implements Runnable
 		}
 	}
 	
+	private void prepareDownload(Environment env)
+	{
+		synchronized(urlcache)
+		{
+			if (urlcache.contains(env.getTarget()))
+			{
+				return;
+			}
+			urlcache.add(env.getTarget());
+		}
+		if (env.getFile()==null)
+		{
+			if (env.isParsingRemote())
+			{
+				//System.out.println("Added: "+env.getTarget());
+				webfetch.addEnvironmentToDownload(env);
+			}
+			else
+			{
+				log.info("No point in downloading "+env.getTarget());
+			}
+		}
+		else
+		{
+			File target = env.getFile();
+			synchronized(filecache)
+			{
+				if (filecache.containsKey(target))
+				{
+					if (env.isParsingRemote())
+					{
+						filecache.put(target,Boolean.TRUE);
+					}
+					return;
+				}
+				if ((!target.exists())||(env.isOverwriting()))
+				{
+					File parent = target.getParentFile();
+					if ((parent.isDirectory())||((checkDirectory(parent))&&(parent.mkdirs())))
+					{
+						//System.out.println("Added: "+env.getTarget());
+						webfetch.addEnvironmentToDownload(env);
+						filecache.put(target,Boolean.valueOf(env.isParsingRemote()));
+					}
+					else
+					{
+						log.error("Would be unable to store at "+env.getFile());
+					}
+				}
+				else if (env.isParsingLocal())
+				{
+					//System.out.println("Parsing local: "+env.getTarget());
+					webfetch.addParseDetails(new ParseDetails(env.getTarget(),env.getFile()));
+				}
+			}
+		}
+	}
+	
 	public void run()
 	{
-		while (running)
+		while (isRunning())
 		{
 			Environment env = webfetch.getEnvironmentForDecision();
-			while ((env==null)&&(running))
+			while ((env==null)&&(isRunning()))
 			{
 				sleep();
 				env = webfetch.getEnvironmentForDecision();
 			}
-			if (running)
+			if (env!=null)
 			{
 				config.applyConfiguration(env);
 				if (env.isAccepted())
 				{
-					synchronized(urlcache)
-					{
-						if (urlcache.contains(env.getTarget()))
-						{
-							return;
-						}
-						urlcache.add(env.getTarget());
-					}
-					if (env.getFile()==null)
-					{
-						if (env.isParsingRemote())
-						{
-							//System.out.println("Added: "+env.getTarget());
-							webfetch.addEnvironmentToDownload(env);
-						}
-						else
-						{
-							log.info("No point in downloading "+env.getTarget());
-						}
-					}
-					else
-					{
-						File target = env.getFile();
-						synchronized(filecache)
-						{
-							if (filecache.containsKey(target))
-							{
-								if (env.isParsingRemote())
-								{
-									filecache.put(target,Boolean.TRUE);
-								}
-								return;
-							}
-							if ((!target.exists())||(env.isOverwriting()))
-							{
-								File parent = target.getParentFile();
-								if ((parent.isDirectory())||((checkDirectory(parent))&&(parent.mkdirs())))
-								{
-									//System.out.println("Added: "+env.getTarget());
-									webfetch.addEnvironmentToDownload(env);
-									filecache.put(target,Boolean.valueOf(env.isParsingRemote()));
-								}
-								else
-								{
-									log.error("Would be unable to store at "+env.getFile());
-								}
-							}
-							else if (env.isParsingLocal())
-							{
-								//System.out.println("Parsing local: "+env.getTarget());
-								webfetch.addParseDetails(new ParseDetails(env.getTarget(),env.getFile()));
-							}
-						}
-					}
+					prepareDownload(env);
 				}
 			}
 		}

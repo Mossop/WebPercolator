@@ -22,7 +22,7 @@ public class ParsingThread implements Runnable
 {
 	private WebFetch webfetch;
 	private HtmlLinkParser parser;
-	private boolean running;
+	private boolean running = false;
 	
 	public ParsingThread(WebFetch fetch, HtmlLinkParser parser)
 	{
@@ -30,16 +30,21 @@ public class ParsingThread implements Runnable
 		this.parser=parser;
 	}
 	
-	public void start()
+	public synchronized void start()
 	{
 		running=true;
 		(new Thread(this)).start();
 	}
 	
-	public void stop()
+	public synchronized void stop()
 	{
 		running=false;
 		wake();
+	}
+	
+	public synchronized boolean isRunning()
+	{
+		return running;
 	}
 	
 	public synchronized void wake()
@@ -62,15 +67,15 @@ public class ParsingThread implements Runnable
 	
 	public void run()
 	{
-		while (running)
+		while (isRunning())
 		{
 			ParseDetails details = webfetch.getParseDetails();
-			while ((details==null)&&(running))
+			while ((details==null)&&(isRunning()))
 			{
 				sleep();
 				details = webfetch.getParseDetails();
 			}
-			if (running)
+			if (details!=null)
 			{
 				File file = details.getFile();
 				URL base = details.getUrl();
