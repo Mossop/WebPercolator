@@ -44,6 +44,8 @@ public class Downloader implements Runnable
 	 */
 	public void run()
 	{
+		DownloadEvent ev = new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_STARTED);
+		queue.processDownloadEvent(ev);
 		try
 		{
 			OutputStream out = new FileOutputStream(download.getLocalFile());
@@ -63,20 +65,28 @@ public class Downloader implements Runnable
 				out.close();
 				in.close();
 				method.releaseConnection();
+				ev = new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_COMPLETE);
+				queue.processDownloadEvent(ev);
 			}
 			catch (HttpException e)
 			{
 				method.releaseConnection();
 				out.close();
+				ev = new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_FAILED);
+				queue.processDownloadEvent(ev);
 			}
 			catch (IOException e)
 			{
 				method.releaseConnection();
 				out.close();
+				ev = new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_FAILED);
+				queue.processDownloadEvent(ev);
 			}
 		}
 		catch (IOException e) // Thrown when the file could not be opened for writing.
 		{
+			ev = new DownloadEvent(queue,this,download,DownloadEvent.DOWNLOAD_FAILED);
+			queue.processDownloadEvent(ev);
 		}
 	}
 

@@ -10,9 +10,10 @@ public class DownloadEvent
 	private Download download;
 	private int type;
 	
-	public static final int DOWNLOAD_UPDATE = 0;
-	public static final int DOWNLOAD_COMPLETE = 1;
-	public static final int DOWNLOAD_FAILED = 2;
+	public static final int DOWNLOAD_STARTED = 0;
+	public static final int DOWNLOAD_UPDATE = 1;
+	public static final int DOWNLOAD_COMPLETE = 2;
+	public static final int DOWNLOAD_FAILED = -1;
 	
 	public DownloadEvent(DownloadQueue q, Downloader d, Download r, int type)
 	{

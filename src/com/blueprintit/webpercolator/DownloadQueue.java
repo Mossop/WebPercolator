@@ -2,6 +2,7 @@ package com.blueprintit.webpercolator;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,7 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 /**
  * @author Dave
  */
-public class DownloadQueue implements Runnable
+public class DownloadQueue
 {
 	private Map inprogress;
 	private List queue;
@@ -22,16 +23,88 @@ public class DownloadQueue implements Runnable
 	private boolean running;
 	private int maxdownloads;
 	private HttpClient agent;
+	private List listeners;
 	
 	public DownloadQueue()
 	{
 		inprogress = Collections.synchronizedMap(new HashMap());
 		queue = Collections.synchronizedList(new LinkedList());
 		cache = Collections.synchronizedMap(new HashMap());
+		listeners = new LinkedList();
 		running=false;
 		MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
 		agent = new HttpClient(manager);
 		maxdownloads=10;
+	}
+	
+	public void addDownloadListener(DownloadListener l)
+	{
+		synchronized(listeners)
+		{
+			listeners.add(l);
+		}
+	}
+	
+	public void removeDownloadListener(DownloadListener l)
+	{
+		synchronized(listeners)
+		{
+			listeners.remove(l);
+		}
+	}
+	
+	void processDownloadEvent(DownloadEvent ev)
+	{
+		synchronized(listeners)
+		{
+			Iterator loop = listeners.iterator();
+			while (loop.hasNext())
+			{
+				DownloadListener listener = (DownloadListener)loop.next();
+				switch (ev.getType())
+				{
+					case DownloadEvent.DOWNLOAD_STARTED:
+						listener.downloadStarted(ev);
+						break;
+					case DownloadEvent.DOWNLOAD_UPDATE:
+						listener.downloadUpdate(ev);
+						break;
+					case DownloadEvent.DOWNLOAD_COMPLETE:
+						listener.downloadComplete(ev);
+						break;
+					case DownloadEvent.DOWNLOAD_FAILED:
+						listener.downloadFailed(ev);
+						break;
+				}
+			}
+		}
+		if (ev.getDownload() instanceof DownloadListener)
+		{
+			DownloadListener listener = (DownloadListener)ev.getDownload();
+			switch (ev.getType())
+			{
+				case DownloadEvent.DOWNLOAD_STARTED:
+					listener.downloadStarted(ev);
+					break;
+				case DownloadEvent.DOWNLOAD_UPDATE:
+					listener.downloadUpdate(ev);
+					break;
+				case DownloadEvent.DOWNLOAD_COMPLETE:
+					listener.downloadComplete(ev);
+					break;
+				case DownloadEvent.DOWNLOAD_FAILED:
+					listener.downloadFailed(ev);
+					break;
+			}
+		}
+		switch (ev.getType())
+		{
+			case DownloadEvent.DOWNLOAD_COMPLETE:
+			case DownloadEvent.DOWNLOAD_FAILED:
+				inprogress.remove(ev.getDownload());
+				checkWaiting();
+				break;
+		}
 	}
 	
 	public void complete()
@@ -46,7 +119,7 @@ public class DownloadQueue implements Runnable
 		{
 			running=true;
 			abort=false;
-			(new Thread(this)).start();
+			checkWaiting();
 		}
 	}
 	
@@ -59,7 +132,7 @@ public class DownloadQueue implements Runnable
 	{
 		if (running)
 		{
-			// Assuming that this wouldbe a bad thing.
+			// Assuming that this would be a bad thing.
 			throw new IllegalStateException("Cannot change Http state while downloading");
 		}
 		agent.setState(value);
@@ -73,12 +146,16 @@ public class DownloadQueue implements Runnable
 	
 	private synchronized void checkWaiting()
 	{
-		while ((inprogress.size()<maxdownloads)&&(queue.size()>0))
+		while ((!abort)&&(inprogress.size()<maxdownloads)&&(queue.size()>0))
 		{
 			Download r = (Download)queue.remove(0);
 			Downloader d = new Downloader(agent,this,r);
 			inprogress.put(r,d);
 			d.start();
+		}
+		if (inprogress.size()==0)
+		{
+			running=false;
 		}
 	}
 	
@@ -88,6 +165,7 @@ public class DownloadQueue implements Runnable
 		{
 			cache.put(r.getLocalFile(),r);
 			queue.add(r);
+			checkWaiting();
 		}
 	}
 	
@@ -103,24 +181,5 @@ public class DownloadQueue implements Runnable
 			{
 			}
 		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Runnable#run()
-	 */
-	public void run()
-	{
-		checkWaiting();
-		while ((!abort)&&((inprogress.size()+queue.size())>0))
-		{
-			try
-			{
-				Thread.sleep(10);
-			}
-			catch (InterruptedException e)
-			{
-			}
-		}
-		running=false;
 	}
 }
