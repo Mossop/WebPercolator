@@ -16,7 +16,6 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import com.blueprintit.webfetch.v1.V1ConfigurationParser;
-import com.blueprintit.webpercolator.Download;
 import com.blueprintit.webpercolator.DownloadQueue;
 
 /**
@@ -27,16 +26,20 @@ public class WebFetch
 	private Configuration config;
 	private DownloadQueue queue;
 	
-	public WebFetch(Collection downloads, Configuration config)
+	public WebFetch(Collection environments, Configuration config)
 	{
 		this.config=config;
 		queue = new DownloadQueue();
-		Iterator loop = downloads.iterator();
+		Iterator loop = environments.iterator();
 		while (loop.hasNext())
 		{
-			Download download = (Download)loop.next();
-			queue.add(download);
+			addEnvironment((Environment)loop.next());
 		}
+	}
+	
+	public void addEnvironment(Environment env)
+	{
+		queue.add(new EnvironmentDownload(env));
 	}
 	
 	public void start()
@@ -137,22 +140,21 @@ public class WebFetch
 		if (config!=null)
 		{
 			urls.addAll(config.getURLs());
-			Collection downloads = new LinkedList();
+			Collection environments = new LinkedList();
 			Iterator loop = urls.iterator();
 			while (loop.hasNext())
 			{
 				URL url = (URL)loop.next();
 				Environment env = new Environment(url);
 				config.applyConfiguration(env);
-				Download download = env.getDownload();
-				if (download!=null)
+				if (env.getAccepted())
 				{
-					downloads.add(download);
+					environments.add(env);
 				}
 			}
-			if (downloads.size()>0)
+			if (environments.size()>0)
 			{
-				(new WebFetch(downloads,config)).start();
+				(new WebFetch(environments,config)).start();
 			}
 			else
 			{

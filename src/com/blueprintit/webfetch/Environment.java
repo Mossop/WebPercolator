@@ -1,12 +1,11 @@
 package com.blueprintit.webfetch;
 
+import java.io.File;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.blueprintit.webpercolator.Download;
 
 /**
  * @author Dave
@@ -15,6 +14,7 @@ public class Environment
 {
 	private URL target;
 	private URL referer;
+	private File file = null;
 	private boolean accepted = false;
 	private boolean rejected = false;
 	private Map custom;
@@ -30,11 +30,6 @@ public class Environment
 		this.referer=referer;
 	}
 
-	public Download getDownload()
-	{
-		return null;
-	}
-	
 	public Map getCustom()
 	{
 		if (custom==null)
@@ -82,6 +77,16 @@ public class Environment
 	public void setRejected(boolean rejected)
 	{
 		this.rejected = rejected;
+	}
+	
+	public File getFile()
+	{
+		return file;
+	}
+
+	public void setFile(File file)
+	{
+		this.file = file;
 	}
 	
 	private Object getValue(String[] args, int pos, int max, Object key)
@@ -135,43 +140,18 @@ public class Environment
 		{
 			return value;
 		}
-		else if (type.getName().equals("java.lang.Integer"))
+		else
 		{
 			try
 			{
-				Integer test = Integer.valueOf(value);
-				return test;
+				Constructor con = type.getConstructor(new Class[] {value.getClass()});
+				return con.newInstance(new Object[] {value});
 			}
 			catch (Exception e)
 			{
 				return null;
 			}
 		}
-		else if (type.getName().equals("java.lang.Boolean"))
-		{
-			try
-			{
-				Boolean test = Boolean.valueOf(value);
-				return test;
-			}
-			catch (Exception e)
-			{
-				return null;
-			}
-		}
-		else if (type.getName().equals("java.net.URL"))
-		{
-			try
-			{
-				URL test = new URL(value);
-				return test;
-			}
-			catch (MalformedURLException e)
-			{
-				return null;
-			}
-		}
-		return null;
 	}
 	
 	public void setValue(String key, String value)
