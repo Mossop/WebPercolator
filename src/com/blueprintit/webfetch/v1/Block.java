@@ -35,6 +35,7 @@ public class Block extends ConditionGroup implements ActionSet, ConditionSet
 		actionmap.put("Script","com.blueprintit.webfetch.v1.actions.ScriptAction");
 		actionmap.put("Parse","com.blueprintit.webfetch.v1.actions.ParseSettingAction");
 		actionmap.put("Overwrite","com.blueprintit.webfetch.v1.actions.OverwriteSettingAction");
+		actionmap.put("Set","com.blueprintit.webfetch.v1.actions.SetAction");
 	}
 	
 	public Block(boolean matchAll)
@@ -72,7 +73,15 @@ public class Block extends ConditionGroup implements ActionSet, ConditionSet
 	
 	public void addAction(Action action)
 	{
-		actions.add(action);
+		if (action.isAction())
+		{
+			actions.add(action);
+		}
+	}
+	
+	public boolean isAction()
+	{
+		return true;
 	}
 	
 	public void execute(ConfigurationSet config, ScriptingEnvironment env)

@@ -26,7 +26,7 @@ public class ScriptCondition extends AbstractCondition
 
 	public boolean checkForMatch(ScriptingEnvironment env)
 	{
-		return Boolean.valueOf(env.evaluate(script,type)).booleanValue();
+		return env.evaluateAsBoolean(script,type);
 	}
 
 }

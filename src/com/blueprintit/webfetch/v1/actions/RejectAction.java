@@ -18,6 +18,11 @@ import com.blueprintit.webfetch.v1.ScriptingEnvironment;
  */
 public class RejectAction implements Action
 {
+	public boolean isAction()
+	{
+		return true;
+	}
+	
 	public void parseConfig(Element element) throws ConfigurationParseException
 	{
 	}

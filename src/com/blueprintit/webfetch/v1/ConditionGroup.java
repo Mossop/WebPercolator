@@ -76,7 +76,15 @@ public class ConditionGroup extends ElementConfigParser implements ConditionSet
 	
 	public void addCondition(Condition condition)
 	{
-		conditions.add(condition);
+		if (condition.isCondition())
+		{
+			conditions.add(condition);
+		}
+	}
+	
+	public boolean isCondition()
+	{
+		return true;
 	}
 	
 	public boolean matches(ScriptingEnvironment env)

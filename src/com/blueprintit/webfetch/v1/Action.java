@@ -15,6 +15,8 @@ import com.blueprintit.webfetch.ConfigurationParseException;
  */
 public interface Action
 {
+	public boolean isAction();
+	
 	public void parseConfig(Element element) throws ConfigurationParseException;
 	
 	public void execute(ConfigurationSet config, ScriptingEnvironment env);

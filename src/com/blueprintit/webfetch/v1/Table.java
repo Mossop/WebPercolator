@@ -60,6 +60,11 @@ public class Table extends ElementConfigParser implements Action
 	{
 		return name;
 	}
+	
+	public boolean isAction()
+	{
+		return true;
+	}
 
 	protected boolean parseSubElement(Element element) throws ConfigurationParseException
 	{

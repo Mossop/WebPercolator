@@ -36,6 +36,6 @@ public class LogAction extends AbstractAction
 
 	public void execute(ConfigurationSet config, ScriptingEnvironment env)
 	{
-		log.error(env.evaluate(content,type));
+		log.error(env.evaluateAsString(content,type));
 	}
 }

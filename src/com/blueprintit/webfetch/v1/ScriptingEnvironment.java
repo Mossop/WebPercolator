@@ -125,7 +125,12 @@ public class ScriptingEnvironment
 		}
 	}
 	
-	public String evaluate(String script, String type)
+	public boolean evaluateAsBoolean(String script, String type)
+	{
+		return Boolean.valueOf(evaluateAsString(script,type)).booleanValue();
+	}
+	
+	public String evaluateAsString(String script, String type)
 	{
 		switch (determineScriptType(type))
 		{

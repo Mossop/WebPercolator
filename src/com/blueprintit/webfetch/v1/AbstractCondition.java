@@ -18,6 +18,11 @@ public abstract class AbstractCondition extends ElementConfigParser implements C
 	private boolean invert = false;
 	protected String type="text/javascript";
 	
+	public boolean isCondition()
+	{
+		return true;
+	}
+	
 	public boolean parseSubElement(Element element) throws ConfigurationParseException
 	{
 		return false;

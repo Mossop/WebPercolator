@@ -17,6 +17,11 @@ public abstract class BooleanSettingAction extends ElementConfigParser implement
 {
 	protected boolean setting;
 	
+	public boolean isAction()
+	{
+		return true;
+	}
+	
 	public void parseElement(Element element)
 	{
 		if (element.hasAttribute("setting"))

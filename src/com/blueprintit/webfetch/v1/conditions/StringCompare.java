@@ -60,12 +60,12 @@ public class StringCompare extends AbstractCondition
 		}
 		String type = (String)types.get(0);
 		String value = (String)values.get(0);
-		String first = env.evaluate(value,type);
+		String first = env.evaluateAsString(value,type);
 		for (int loop=1; loop<types.size(); loop++)
 		{
 			type = (String)types.get(loop);
 			value = (String)values.get(loop);
-			String result = env.evaluate(value,type);
+			String result = env.evaluateAsString(value,type);
 			if (!result.equals(first))
 				return false;
 		}

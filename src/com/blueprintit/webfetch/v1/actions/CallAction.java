@@ -24,6 +24,11 @@ public class CallAction implements Action
 	private String tablename;
 	private static Log log = LogFactory.getLog(CallAction.class);
 	
+	public boolean isAction()
+	{
+		return true;
+	}
+	
 	public void parseConfig(Element element) throws ConfigurationParseException
 	{
 		if (element.hasAttribute("table"))

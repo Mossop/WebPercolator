@@ -15,6 +15,8 @@ import com.blueprintit.webfetch.ConfigurationParseException;
  */
 public interface Condition
 {
+	public boolean isCondition();
+	
 	public void parseConfig(Element element) throws ConfigurationParseException;
 	
 	public boolean matches(ScriptingEnvironment env);
