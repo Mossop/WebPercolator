@@ -6,7 +6,6 @@
  */
 package com.blueprintit.webfetch.v1;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.blueprintit.webfetch.Environment;
@@ -78,28 +77,8 @@ public class DownloadSettings
 		return target;
 	}
 	
-	public void setUrl(String url) throws MalformedURLException
-	{
-		target.setURL(url);
-	}
-	
-	public void setUrl(URL url)
-	{
-		target.setURL(url);
-	}
-	
 	public URLBuilder getReferer()
 	{
 		return referer;
-	}
-	
-	public void setReferer(String url) throws MalformedURLException
-	{
-		referer.setURL(url);
-	}
-	
-	public void setReferer(URL url)
-	{
-		referer.setURL(url);
 	}
 }

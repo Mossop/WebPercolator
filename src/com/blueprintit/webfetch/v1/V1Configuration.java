@@ -57,13 +57,21 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 	public void applyConfiguration(Environment env)
 	{
 		ScriptingEnvironment scope = new ScriptingEnvironment(env);
-		if (matches(scope))
+		try
 		{
-			applyConfigurationSet(scope);
+			if (matches(scope))
+			{
+				applyConfigurationSet(scope);
+			}
+			else
+			{
+				env.setRejected(true);
+			}
 		}
-		else
+		catch (RuntimeException r)
 		{
-			env.setRejected(true);
+			scope.exit();
+			throw r;
 		}
 		scope.exit();
 	}

@@ -16,7 +16,8 @@ import com.blueprintit.webfetch.ConfigurationParseException;
 public abstract class AbstractCondition extends ElementConfigParser implements Condition
 {
 	private boolean invert = false;
-
+	protected String type="text/javascript";
+	
 	public boolean parseSubElement(Element element)
 	{
 		return false;
@@ -26,6 +27,10 @@ public abstract class AbstractCondition extends ElementConfigParser implements C
 	
 	public final void parseConfig(Element element) throws ConfigurationParseException
 	{
+		if (element.hasAttribute("type"))
+		{
+			type=element.getAttribute(type);
+		}
 		if (element.hasAttribute("invert"))
 		{
 			invert=Boolean.valueOf(element.getAttribute("invert")).booleanValue();

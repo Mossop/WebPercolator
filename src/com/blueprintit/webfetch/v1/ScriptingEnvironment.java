@@ -21,6 +21,10 @@ import com.blueprintit.webfetch.Environment;
  */
 public class ScriptingEnvironment
 {
+	private static final int SCRIPT_UNKNOWN = -1;
+	private static final int SCRIPT_PLAIN = 0;
+	private static final int SCRIPT_JAVASCRIPT = 1;
+	
 	private Environment env;
 	private Map custom;
 	private Context jsContext;
@@ -62,29 +66,63 @@ public class ScriptingEnvironment
 		return settings;
 	}
 	
-	public void execute(String script)
+	private int determineScriptType(String type)
 	{
-		try
+		if (type.indexOf("/")<0)
 		{
-			jsContext.evaluateString(jsScope,script,"",1,null);
+			type="text/"+type;
 		}
-		catch (JavaScriptException e)
+		if (type.equals("text/plain"))
 		{
-			System.err.println("Error executing script");
+			return SCRIPT_PLAIN;
+		}
+		if (type.equals("text/javascript"))
+		{
+			return SCRIPT_JAVASCRIPT;
+		}
+		return SCRIPT_UNKNOWN;
+	}
+	
+	public void execute(String script, String type)
+	{
+		switch (determineScriptType(type))
+		{
+			case SCRIPT_PLAIN:
+				break;
+			case SCRIPT_JAVASCRIPT:
+				try
+				{
+					jsContext.evaluateString(jsScope,script,"",1,null);
+				}
+				catch (JavaScriptException e)
+				{
+					System.err.println("Error executing script");
+				}
+				break;
+			default:
+				throw new IllegalArgumentException("Unknown script type: "+type);
 		}
 	}
 	
-	public String evaluate(String script)
+	public String evaluate(String script, String type)
 	{
-		try
+		switch (determineScriptType(type))
 		{
-			Object result = jsContext.evaluateString(jsScope,script,"",1,null);
-			return jsContext.toString(result);
-		}
-		catch (JavaScriptException e)
-		{
-			System.err.println("Error executing script");
-			return "";
+			case SCRIPT_PLAIN:
+				return script;
+			case SCRIPT_JAVASCRIPT:
+				try
+				{
+					Object result = jsContext.evaluateString(jsScope,script,"",1,null);
+					return jsContext.toString(result);
+				}
+				catch (JavaScriptException e)
+				{
+					System.err.println("Error executing script");
+					return "";
+				}
+			default:
+				throw new IllegalArgumentException("Unknown script type: "+type);
 		}
 	}
 	
@@ -93,133 +131,4 @@ public class ScriptingEnvironment
 		jsContext.exit();
 		settings.store(env);
 	}
-
-	/*public Map getCustom()
-	{
-		if (custom==null)
-		{
-			custom = new HashMap();
-		}
-		return custom;
-	}
-	
-	private Object getValue(String[] args, int pos, int max, Object key)
-	{
-		if ((pos==args.length)||(pos==max))
-		{
-			return key;
-		}
-		if (key==null)
-		{
-			return null;
-		}
-		if (key instanceof Map)
-		{
-			Object result = ((Map)key).get(args[pos]);
-			return getValue(args,pos+1,max,result);
-		}
-		else
-		{
-			String methodname ="get"+args[pos].substring(0,1).toUpperCase()+args[pos].substring(1);
-			try
-			{
-				Method call = key.getClass().getMethod(methodname,new Class[0]);
-				Object result = call.invoke(key,new Object[0]);
-				return getValue(args,pos+1,max,result);
-			}
-			catch (Exception e)
-			{
-				return null;
-			}
-		}
-	}
-	
-	public String getValue(String key)
-	{
-		Object result = getValue(key.split("\\."),0,-1,this);
-		if (result==null)
-		{
-			System.err.println("Property "+key+" could not be found.");
-			return "";
-		}
-		else
-		{
-			return result.toString();
-		}
-	}
-	
-	private Object convertValue(String value, Class type)
-	{
-		if (type.getName().equals("java.lang.String"))
-		{
-			return value;
-		}
-		else
-		{
-			try
-			{
-				Constructor con = type.getConstructor(new Class[] {value.getClass()});
-				return con.newInstance(new Object[] {value});
-			}
-			catch (Exception e)
-			{
-				return null;
-			}
-		}
-	}
-	
-	public void setValue(String key, String value)
-	{
-		String[] args = key.split("\\.");
-		Object object = getValue(args,0,args.length-1,this);
-		if (object!=null)
-		{
-			if (object instanceof Map)
-			{
-				((Map)object).put(args[args.length-1],value);
-			}
-			else
-			{
-				String methodname ="set"+args[args.length-1].substring(0,1).toUpperCase()+args[args.length-1].substring(1);
-				try
-				{
-					Method[] methods = key.getClass().getMethods();
-					Method method = null;
-					Object converted = null;
-					for (int loop=0; loop<methods.length; loop++)
-					{
-						if ((methods[loop].getName().equals(methodname))&&(methods[loop].getReturnType()==Void.TYPE))
-						{
-							Class[] params = methods[loop].getParameterTypes();
-							if (params.length==1)
-							{
-								converted = convertValue(value,params[0]);
-								if (converted!=null)
-								{
-									method = methods[loop];
-									break;
-								}
-							}
-						}
-					}
-					if (method!=null)
-					{
-						method.invoke(object,new Object[] {converted});
-					}
-					else
-					{
-						System.err.println("Could not find a property called "+key+" that could be set to "+value);
-					}
-				}
-				catch (Exception e)
-				{
-					System.err.println("Property "+key+" could not be found.");
-				}
-			}
-		}
-		else
-		{
-			System.err.println("Property "+key+" could not be found.");
-		}
-	}*/
 }
