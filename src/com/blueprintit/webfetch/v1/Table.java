@@ -18,11 +18,13 @@ import com.blueprintit.webfetch.ConfigurationParseException;
  */
 public class Table extends ElementConfigParser implements Action
 {
+	private boolean newScope;
 	private List rows;
 	private String name = "";
 	
 	public Table()
 	{
+		newScope=true;
 		rows = new ArrayList();
 	}
 	
@@ -34,6 +36,8 @@ public class Table extends ElementConfigParser implements Action
 	
 	public void execute(ConfigurationSet config, ScriptingEnvironment env)
 	{
+		if (newScope)
+			env.enterNewScope();
 		Iterator loop = rows.iterator();
 		while (loop.hasNext())
 		{
@@ -48,6 +52,8 @@ public class Table extends ElementConfigParser implements Action
 				break;
 			}
 		}
+		if (newScope)
+			env.exitCurrentScope();
 	}
 	
 	public String getName()
@@ -61,6 +67,21 @@ public class Table extends ElementConfigParser implements Action
 		{
 			rows.add(new TableRow(element));
 			return true;
+		}
+		if (element.hasAttribute("scope"))
+		{
+			if (element.getAttribute("scope").equals("new"))
+			{
+				newScope=true;
+			}
+			else if (element.getAttribute("scope").equals("current"))
+			{
+				newScope=false;
+			}
+			else
+			{
+				throw new ConfigurationParseException("scope should be new or current");
+			}
 		}
 		return false;
 	}

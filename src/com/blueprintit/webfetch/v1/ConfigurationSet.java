@@ -25,10 +25,12 @@ public class ConfigurationSet extends ConditionSet
 	private Map tables;
 	private Collection patterns;
 	private Map settings;
+	private boolean newScope;
 	
 	ConfigurationSet(Element element) throws ConfigurationParseException
 	{
 		super(true);
+		newScope=true;
 		tables = new HashMap();
 		settings = new HashMap();
 		configsets = new LinkedList();
@@ -106,6 +108,26 @@ public class ConfigurationSet extends ConditionSet
 		return super.parseSubElement(element);
 	}
 	
+	public void parseConfig(Element element) throws ConfigurationParseException
+	{
+		if (element.hasAttribute("scope"))
+		{
+			if (element.getAttribute("scope").equals("new"))
+			{
+				newScope=true;
+			}
+			else if (element.getAttribute("scope").equals("current"))
+			{
+				newScope=false;
+			}
+			else
+			{
+				throw new ConfigurationParseException("scope should be new or current");
+			}
+		}
+		super.parseConfig(element);
+	}
+	
 	private void doApplyConfigurationSet(ScriptingEnvironment env)
 	{
 		Table start = findTable("");
@@ -121,7 +143,8 @@ public class ConfigurationSet extends ConditionSet
 	
 	protected void applyConfigurationSet(ScriptingEnvironment env)
 	{
-		env.enterNewScope();
+		if (newScope)
+			env.enterNewScope();
 		Iterator loop = configsets.iterator();
 		while (loop.hasNext())
 		{
@@ -134,7 +157,8 @@ public class ConfigurationSet extends ConditionSet
 			}
 		}
 		doApplyConfigurationSet(env);
-		env.exitCurrentScope();
+		if (newScope)
+			env.exitCurrentScope();
 	}
 	
 	public Table findTable(String name)
