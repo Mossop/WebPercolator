@@ -105,16 +105,40 @@ public class WebFetch
 			public void downloadFailed(DownloadEvent e)
 			{
 				// TODO add checking for valid HTTP errors that should not be repeated
-				
-				Environment env = ((EnvironmentDownload)e.getDownload()).getEnvironment();
-				if (env.getAttempts()>0)
+				boolean retryable=true;
+				if (e.getException()==null)
 				{
-					System.out.println("Retrying download "+env.getTarget());
-					addEnvironmentToDownload(env);
+					int code = e.getDownload().getHttpMethod().getStatusCode();
+					if (code==403)
+					{
+						System.err.println("Not authorised to download "+e.getDownload().getURL());
+						retryable=false;
+					}
+					else if (code==404)
+					{
+						System.err.println("File does not exist: "+e.getDownload().getURL());
+						retryable=false;
+					}
 				}
-				else
+				if (retryable)
 				{
-					System.err.println("Failed to download "+e.getDownload().getURL()+": "+e.getException().getMessage());
+					Environment env = ((EnvironmentDownload)e.getDownload()).getEnvironment();
+					if (env.getAttempts()>0)
+					{
+						System.out.println("Retrying download "+env.getTarget());
+						addEnvironmentToDownload(env);
+					}
+					else
+					{
+						if (e.getException()==null)
+						{
+							System.err.println("Failed to download "+e.getDownload().getURL()+": "+e.getDownload().getHttpMethod().getStatusLine());
+						}
+						else
+						{
+							System.err.println("Failed to download "+e.getDownload().getURL()+": "+e.getException().getMessage());
+						}
+					}
 				}
 			}
 

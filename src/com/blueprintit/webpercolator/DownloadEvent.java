@@ -35,16 +35,31 @@ public class DownloadEvent
 		this.localFile=target;
 	}
 	
-	public DownloadEvent(DownloadQueue q, Download r, File target, Exception e)
+	private DownloadEvent(DownloadQueue q, Download r, File target, Exception e)
 	{
 		this(q,r,target,DOWNLOAD_FAILED);
 		exception=e;
 	}
 	
-	public DownloadEvent(DownloadQueue q, Download r, URL u)
+	private DownloadEvent(DownloadQueue q, Download r, URL u)
 	{
 		this(q,r,null,DOWNLOAD_REDIRECTED);
 		redirect=u;
+	}
+	
+	public static DownloadEvent createDownloadEvent(DownloadQueue q, Download r, File target, int type)
+	{
+		return new DownloadEvent(q,r,target,type);
+	}
+	
+	public static DownloadEvent createRedirectEvent(DownloadQueue q, Download r, URL u)
+	{
+		return new DownloadEvent(q,r,u);
+	}
+	
+	public static DownloadEvent createFailedDownloadEvent(DownloadQueue q, Download r, File target, Exception e)
+	{
+		return new DownloadEvent(q,r,target,e);
 	}
 	
 	/**
