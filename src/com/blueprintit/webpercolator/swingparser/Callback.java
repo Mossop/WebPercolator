@@ -84,7 +84,7 @@ public class Callback extends ParserCallback
 						if (!(value.startsWith("javascript:")||value.startsWith("mailto:")))
 						{
 							value=value.replaceAll(" ","%20");
-							if (value.charAt(0)=='?')
+							if ((value.length()>0)&&(value.charAt(0)=='?'))
 							{
 								value=base.getPath()+value;
 							}
