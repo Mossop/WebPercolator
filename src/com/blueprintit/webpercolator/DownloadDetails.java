@@ -6,11 +6,10 @@
  */
 package com.blueprintit.webpercolator;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.HttpMethod;
 
 /**
  * @author Dave
@@ -23,7 +22,7 @@ public class DownloadDetails
 	private int statuscode;
 	private String statustext;
 	
-	public DownloadDetails(HttpMethodBase method)
+	public DownloadDetails(HttpMethod method)
 	{
 		statuscode=method.getStatusCode();
 		statustext=method.getStatusText();
@@ -40,16 +39,16 @@ public class DownloadDetails
 			type=header.getValue();
 		}
 		
-		String u = method.getHostConfiguration().getHostURL()+method.getPath();
-		if (method.getQueryString()!=null)
-		{
-			u+="?"+method.getQueryString();
-		}
 		try
 		{
+			String u = method.getURI().getHost()+method.getPath();
+			if (method.getQueryString()!=null)
+			{
+				u+="?"+method.getQueryString();
+			}
 			url = new URL(u);
 		}
-		catch (MalformedURLException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}

@@ -55,8 +55,8 @@ public class DownloadQueue
 		running=false;
 		manager = new MultiThreadedHttpConnectionManager();
 		agent = new HttpClient(manager);
-		manager.setMaxTotalConnections(10);
-		manager.setMaxConnectionsPerHost(10);
+		manager.getParams().setMaxTotalConnections(10);
+		manager.getParams().setDefaultMaxConnectionsPerHost(10);
 		parser = new Parser();
 		ordering = null;
 	}
@@ -66,11 +66,13 @@ public class DownloadQueue
 		globalProxyHost=host;
 		globalProxyPort=port;
 		globalProxySet=true;
+		agent.getHostConfiguration().setProxy(host,port);
 	}
 	
 	public synchronized void clearGlobalProxy()
 	{
 		globalProxySet=false;
+		agent.getHostConfiguration().setProxy(null,-1);
 	}
 	
 	public synchronized boolean isGlobalProxySet()
@@ -83,7 +85,7 @@ public class DownloadQueue
 		HeadMethod method = new HeadMethod(url.toString());
 		if (globalProxySet)
 		{
-			method.getHostConfiguration().setProxy(globalProxyHost,globalProxyPort);
+			agent.getHostConfiguration().setProxy(globalProxyHost,globalProxyPort);
 		}
 		agent.executeMethod(method);
 		method.releaseConnection();
@@ -255,8 +257,8 @@ public class DownloadQueue
 	
 	public synchronized void setMaxDownloads(int value)
 	{
-		manager.setMaxConnectionsPerHost(value);
-		manager.setMaxTotalConnections(value);
+		manager.getParams().setDefaultMaxConnectionsPerHost(value);
+		manager.getParams().setMaxTotalConnections(value);
 		checkWaiting();
 	}
 	
@@ -265,7 +267,7 @@ public class DownloadQueue
 		if (running)
 		{
 			int pos = 0;
-			while ((inprogress.size()<manager.getMaxTotalConnections())&&(pos<queue.size()))
+			while ((inprogress.size()<manager.getParams().getMaxTotalConnections())&&(pos<queue.size()))
 			{
 				Download r = (Download)queue.get(pos);
 				boolean canstart=true;
@@ -324,10 +326,6 @@ public class DownloadQueue
 		if (!(r instanceof Comparable))
 		{
 			cancompare=false;
-		}
-		if ((globalProxySet)&&(!r.getHttpMethod().getHostConfiguration().isProxySet()))
-		{
-			r.getHttpMethod().getHostConfiguration().setProxy(globalProxyHost,globalProxyPort);
 		}
 		int pos = queue.size();
 		if ((ordering!=null)||(cancompare))

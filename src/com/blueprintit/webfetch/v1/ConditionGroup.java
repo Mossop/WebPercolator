@@ -95,7 +95,6 @@ public class ConditionGroup extends ElementConfigParser implements ConditionSet
 		}
 		else
 		{
-			int matchcount=0;
 			Iterator loop = conditions.iterator();
 			while (loop.hasNext())
 			{

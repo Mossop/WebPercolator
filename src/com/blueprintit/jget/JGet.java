@@ -29,6 +29,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 
 import com.blueprintit.webpercolator.Download;
 import com.blueprintit.webpercolator.DownloadEvent;
@@ -206,7 +207,8 @@ public class JGet implements DownloadListener
 			{
 				pathname="/"+pathname;
 			}
-			String file = pathname.substring(pathname.lastIndexOf("/")+1);
+			// TODO Fix this??
+			//String file = pathname.substring(pathname.lastIndexOf("/")+1);
 			String dirs = pathname.substring(0,pathname.lastIndexOf("/"));
 			if (dirs.length()>0)
 			{
@@ -516,7 +518,7 @@ public class JGet implements DownloadListener
 				
 				if (commandline.hasOption("http-user")&&commandline.hasOption("http-passwd"))
 				{
-					queue.getHttpState().setCredentials(null,null,new UsernamePasswordCredentials(commandline.getOptionValue("http-user"),commandline.getOptionValue("http-passwd")));
+					queue.getHttpState().setCredentials(new AuthScope(null,-1),new UsernamePasswordCredentials(commandline.getOptionValue("http-user"),commandline.getOptionValue("http-passwd")));
 				}
 				
 				if (commandline.hasOption("referer"))

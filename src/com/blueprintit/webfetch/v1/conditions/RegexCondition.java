@@ -82,7 +82,6 @@ public class RegexCondition extends AbstractCondition
 
 	public boolean checkForMatch(ScriptingEnvironment env)
 	{
-		boolean result;
 		Matcher matcher = pattern.matcher(env.evaluateAsString(target,type));
 		if (any)
 		{

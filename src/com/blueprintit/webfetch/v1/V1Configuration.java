@@ -18,6 +18,7 @@ import java.util.List;
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -233,8 +234,6 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 		}
 		if (element.getNodeName().equals("Proxy"))
 		{
-			String proxyhost;
-			int proxyport;
 			NodeList list = element.getElementsByTagName("Host");
 			if (list.getLength()==1)
 			{
@@ -298,7 +297,7 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 		while (loop.hasNext())
 		{
 			AuthenticationDetails details = (AuthenticationDetails)loop.next();
-			state.setCredentials(details.getRealm(),details.getHost(),details.getCredentials());
+			state.setCredentials(new AuthScope(details.getHost(),-1,details.getRealm()),details.getCredentials());
 		}
 		
 		loop = cookies.iterator();
