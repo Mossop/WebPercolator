@@ -1,6 +1,7 @@
 package com.blueprintit.webpercolator;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 
 import org.apache.commons.httpclient.HttpMethod;
@@ -18,6 +19,8 @@ public interface Download
 	public static final int APPLET_DOWNLOAD = 5;
 	
 	public HttpMethod getHttpMethod();
+	
+	public DownloadDetails getDownloadDetails(DownloadQueue queue) throws IOException;
 	
 	public URL getURL();
 	

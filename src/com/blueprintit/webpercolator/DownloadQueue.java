@@ -1,6 +1,7 @@
 package com.blueprintit.webpercolator;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,6 +14,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.methods.HeadMethod;
 
 import com.blueprintit.webpercolator.swingparser.Parser;
 
@@ -42,6 +44,14 @@ public class DownloadQueue
 		manager.setMaxTotalConnections(10);
 		manager.setMaxConnectionsPerHost(10);
 		parser = new Parser();
+	}
+	
+	public HeadMethod getURLDetails(URL url) throws HttpException, IOException
+	{
+		HeadMethod method = new HeadMethod(url.toString());
+		agent.executeMethod(method);
+		method.releaseConnection();
+		return method;
 	}
 	
 	public HtmlLinkParser getLinkParser()
@@ -180,7 +190,7 @@ public class DownloadQueue
 				boolean canstart=true;
 				if ((inprogress.size()>0)&&(r.getLocalFile()!=null))
 				{
-					Iterator loop = inprogress.keySet().iterator();
+					Iterator loop = inprogress.values().iterator();
 					while (loop.hasNext())
 					{
 						Downloader d = (Downloader)loop.next();

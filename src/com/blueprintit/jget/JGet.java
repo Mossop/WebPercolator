@@ -21,8 +21,10 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
 
 import com.blueprintit.webpercolator.Download;
+import com.blueprintit.webpercolator.DownloadDetails;
 import com.blueprintit.webpercolator.DownloadEvent;
 import com.blueprintit.webpercolator.DownloadListener;
 import com.blueprintit.webpercolator.DownloadQueue;
@@ -177,27 +179,44 @@ public class JGet implements DownloadListener
 	
 	public synchronized void submitURL(URL url, Download parent, int recursedepth, int type)
 	{
-		if (!shouldDownload(url,parent))
-			return;
-		
-		File local = chooseFilename(url);
-		if (local==null)
-			return;
-		
 		URL referer = this.referer;
 		if (parent!=null)
 		{
 			referer=parent.getURL();
 		}
 		
-		urlcache.add(url);
-		filecache.add(local);
-		
-		Download download = new GetDownload(url,local,type,referer);
-		download.getHttpMethod().setFollowRedirects(false);
-		downloadparents.put(download,parent);
-		downloadrecurses.put(download,new Integer(recursedepth));
-		queue.add(download);
+		GetDownload download = new GetDownload(url,null,type,referer);
+
+		try
+		{
+			DownloadDetails details = download.getDownloadDetails(queue);
+			if (!url.equals(details.getURL()))
+			{
+				url=details.getURL();
+				download.setUrl(url);
+			}
+			
+			if (!shouldDownload(url,parent))
+				return;
+			
+			File local = chooseFilename(url);
+			if (local==null)
+				return;
+			
+			download.setLocalFile(local);
+			
+			urlcache.add(url);
+			filecache.add(local);
+			
+			download.getHttpMethod().setFollowRedirects(false);
+			downloadparents.put(download,parent);
+			downloadrecurses.put(download,new Integer(recursedepth));
+			queue.add(download);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -388,6 +407,11 @@ public class JGet implements DownloadListener
 				else
 				{
 					basedir = (new File("")).getAbsoluteFile();
+				}
+				
+				if (commandline.hasOption("http-user")&&commandline.hasOption("http-passwd"))
+				{
+					queue.getHttpState().setCredentials(null,null,new UsernamePasswordCredentials(commandline.getOptionValue("http-user"),commandline.getOptionValue("http-passwd")));
 				}
 				
 				if (commandline.hasOption("referer"))

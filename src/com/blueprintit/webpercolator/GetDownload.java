@@ -1,6 +1,7 @@
 package com.blueprintit.webpercolator;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
@@ -151,14 +152,22 @@ public class GetDownload implements DownloadListener, Download
 		return method;
 	}
 
-	public HeadMethod getHeadMethod()
+	public DownloadDetails getDownloadDetails(DownloadQueue queue) throws IOException
 	{
-		HeadMethod method = new HeadMethod(url.toString());
-		if (referer!=null)
+		if (method.hasBeenUsed())
 		{
-			method.setRequestHeader("Referer",referer.toString());
+			return new DownloadDetails(method);
 		}
-		return method;
+		else
+		{
+			HeadMethod method = new HeadMethod(url.toString());
+			if (referer!=null)
+			{
+				method.setRequestHeader("Referer",referer.toString());
+			}
+			queue.executeMethod(method);
+			return new DownloadDetails(method);
+		}
 	}
 
 	/**
@@ -167,6 +176,11 @@ public class GetDownload implements DownloadListener, Download
 	public File getLocalFile()
 	{
 		return local;
+	}
+	
+	public void setLocalFile(File file)
+	{
+		local=file;
 	}
 
 	/**
@@ -231,5 +245,46 @@ public class GetDownload implements DownloadListener, Download
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * @return Returns the referer.
+	 */
+	public URL getReferer()
+	{
+		return referer;
+	}
+	
+	/**
+	 * @param referer The referer to set.
+	 */
+	public void setReferer(URL referer)
+	{
+		this.referer = referer;
+		if (referer!=null)
+		{
+			method.setRequestHeader("Referer",referer.toString());
+		}
+	}
+	
+	/**
+	 * @param type The type to set.
+	 */
+	public void setType(int type)
+	{
+		this.type = type;
+	}
+	
+	/**
+	 * @param url The url to set.
+	 */
+	public void setUrl(URL url)
+	{
+		this.url = url;
+		method = new GetMethod(url.toString());
+		if (referer!=null)
+		{
+			method.setRequestHeader("Referer",referer.toString());
+		}
 	}
 }
