@@ -38,6 +38,8 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 	private List cookies;
 	private int maxdownloads;
 	private String ordering;
+	private String proxyhost;
+	private int proxyport;
 	
 	public V1Configuration(File base, Element element) throws ConfigurationParseException
 	{
@@ -48,9 +50,21 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 		environments = new ArrayList();
 		cookies = new ArrayList();
 		authdetails = new ArrayList();
+		proxyhost = null;
+		proxyport = -1;
 		parseConfig(element);
 	}
 	
+	public String getProxyHost()
+	{
+		return proxyhost;
+	}
+
+	public int getProxyPort()
+	{
+		return proxyport;
+	}
+
 	public int getMaxDownloads()
 	{
 		return maxdownloads;
@@ -216,6 +230,37 @@ public class V1Configuration extends ConfigurationSet implements Configuration
 			{
 				throw new ConfigurationParseException("Cookie must have a url attribute");
 			}
+		}
+		if (element.getNodeName().equals("Proxy"))
+		{
+			String proxyhost;
+			int proxyport;
+			NodeList list = element.getElementsByTagName("Host");
+			if (list.getLength()==1)
+			{
+				proxyhost = getElementText((Element)list.item(0));
+			}
+			else
+			{
+				throw new ConfigurationParseException("Cookie must contain a Name");
+			}
+			list = element.getElementsByTagName("Port");
+			if (list.getLength()==1)
+			{
+				try
+				{
+					proxyport = Integer.parseInt(getElementText((Element)list.item(0)));
+				}
+				catch (NumberFormatException e)
+				{
+					throw new ConfigurationParseException("Proxy port must be a number",e);
+				}
+			}
+			else
+			{
+				throw new ConfigurationParseException("Cookie must contain a Value");
+			}
+			return true;
 		}
 		return super.parseSubElement(element);
 	}

@@ -68,6 +68,10 @@ public class WebFetch
 		this.config=config;
 		queue = new DownloadQueue();
 		
+		if ((config.getProxyHost()!=null)&&(config.getProxyPort()>0))
+		{
+			queue.setGlobalProxy(config.getProxyHost(),config.getProxyPort());
+		}
 		//queue.setOrdering(config.getOrdering(queue));
 		
 		queue.addQueueListener(new QueueAdapter() {
