@@ -13,6 +13,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import com.blueprintit.webfetch.ConfigurationParseException;
 
@@ -27,6 +30,8 @@ public class ConfigurationSet extends Block
 	private Collection patterns;
 	private Map settings;
 	private Map localsettings;
+	
+	private static Log log = LogFactory.getLog(ConfigurationSet.class);
 	
 	protected ConfigurationSet()
 	{
@@ -241,7 +246,7 @@ public class ConfigurationSet extends Block
 		}
 		else
 		{
-			System.err.println("No default table found");
+			log.warn("No default table found");
 		}
 		if (!env.isDecided())
 		{

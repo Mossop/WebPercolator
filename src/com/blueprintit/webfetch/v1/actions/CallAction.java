@@ -6,6 +6,8 @@
  */
 package com.blueprintit.webfetch.v1.actions;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 
 import com.blueprintit.webfetch.ConfigurationParseException;
@@ -19,7 +21,8 @@ import com.blueprintit.webfetch.v1.Table;
  */
 public class CallAction implements Action
 {
-	String tablename;
+	private String tablename;
+	private static Log log = LogFactory.getLog(CallAction.class);
 	
 	public void parseConfig(Element element) throws ConfigurationParseException
 	{
@@ -42,7 +45,7 @@ public class CallAction implements Action
 		}
 		else
 		{
-			System.err.println("Warning, table "+table+" could not be found.");
+			log.error("Warning, table "+table+" could not be found.");
 		}
 	}
 }

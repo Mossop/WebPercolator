@@ -9,6 +9,8 @@ package com.blueprintit.webfetch.v1.conditions;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 
 import com.blueprintit.webfetch.ConfigurationParseException;
@@ -22,6 +24,7 @@ public class StringCompare extends AbstractCondition
 {
 	private List values;
 	private List types;
+	private static Log log = LogFactory.getLog(StringCompare.class);
 	
 	public void parseCondition(Element element) throws ConfigurationParseException
 	{
@@ -29,7 +32,7 @@ public class StringCompare extends AbstractCondition
 		types = new ArrayList();
 		if (types.size()<2)
 		{
-			System.err.println("There should be at least two values in a string compare");
+			log.warn("There should be at least two values in a string compare");
 		}
 	}
 	

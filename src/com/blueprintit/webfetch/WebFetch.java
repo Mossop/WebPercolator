@@ -18,6 +18,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -33,6 +35,8 @@ public class WebFetch implements DownloadListener
 {
 	private Configuration config;
 	private DownloadQueue queue;
+	
+	private static Log log = LogFactory.getLog(WebFetch.class);
 	
 	public WebFetch(Configuration config)
 	{
@@ -76,7 +80,7 @@ public class WebFetch implements DownloadListener
 				}
 				else
 				{
-					System.err.println("No point in downloading "+env.getTarget());
+					log.info("No point in downloading "+env.getTarget());
 				}
 			}
 			else
@@ -125,7 +129,7 @@ public class WebFetch implements DownloadListener
 							parser = new V1ConfigurationParser();
 							break;
 						default:
-							System.err.println("Unknown configuration version: "+version);
+							log.fatal("Unknown configuration version: "+version);
 							return null;
 					}
 					try
@@ -134,30 +138,30 @@ public class WebFetch implements DownloadListener
 					}
 					catch (ConfigurationParseException e)
 					{
-						System.err.println(e.getMessage());
+						log.fatal("Unable to parse configuration file",e);
 						return null;
 					}
 				}
 				else
 				{
-					System.err.println("Config file is an invalid format.");
+					log.fatal("Config file is an invalid format.");
 					return null;
 				}
 			}
 			catch (SAXException e)
 			{
-				System.err.println("Error parsing xml: "+e.getMessage());
+				log.fatal("Error parsing xml",e);
 				return null;
 			}
 			catch (IOException e)
 			{
-				System.err.println("Error reading from config file: "+e.getMessage());
+				log.fatal("Error reading from config file",e);
 				return null;
 			}
 		}
 		catch (ParserConfigurationException e)
 		{
-			System.err.println("Unable to initialise xml parser: "+e.getMessage());
+			log.fatal("Unable to initialise xml parser",e);
 			return null;
 		}
 	}
@@ -190,7 +194,7 @@ public class WebFetch implements DownloadListener
 				}
 				catch (MalformedURLException e)
 				{
-					System.err.println("Unable to parse URL "+args[loop]);
+					log.error("Unable to parse URL "+args[loop]);
 				}
 			}
 		}
@@ -212,12 +216,12 @@ public class WebFetch implements DownloadListener
 			}
 			else
 			{
-				System.err.println("No valid urls specified to download");
+				log.fatal("No valid urls specified to download");
 			}
 		}
 		else
 		{
-			System.err.println("No configuration was specified");
+			log.fatal("No configuration was specified");
 		}
 	}
 

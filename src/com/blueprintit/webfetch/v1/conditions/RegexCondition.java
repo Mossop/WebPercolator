@@ -10,6 +10,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 
 import com.blueprintit.webfetch.ConfigurationParseException;
@@ -26,6 +28,7 @@ public class RegexCondition extends AbstractCondition
 	boolean any=true;
 	boolean start=false;
 	Pattern pattern;
+	private static Log log = LogFactory.getLog(RegexCondition.class);
 	
 	public void parseCondition(Element element) throws ConfigurationParseException
 	{
@@ -56,7 +59,7 @@ public class RegexCondition extends AbstractCondition
 		String text = getElementText(element);
 		if (text.length()==0)
 		{
-			System.err.println("Warning, adding a blank regular expression. Will match everything");
+			log.warn("Warning, adding a blank regular expression. Will match everything");
 		}
 		try
 		{

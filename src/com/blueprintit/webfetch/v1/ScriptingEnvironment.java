@@ -9,6 +9,8 @@ package com.blueprintit.webfetch.v1;
 import java.io.File;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.Scriptable;
@@ -29,6 +31,8 @@ public class ScriptingEnvironment
 	private Scriptable jsScope;
 	private DownloadSettings settings;
 	private int depth;
+	
+	private static Log log = LogFactory.getLog(ScriptingEnvironment.class);
 	
 	/**
 	 * @param env
@@ -113,7 +117,7 @@ public class ScriptingEnvironment
 				}
 				catch (JavaScriptException e)
 				{
-					System.err.println("Error executing script");
+					log.error("Error executing script");
 				}
 				break;
 			default:
@@ -135,7 +139,7 @@ public class ScriptingEnvironment
 				}
 				catch (JavaScriptException e)
 				{
-					System.err.println("Error executing script");
+					log.error("Error executing script");
 					return "";
 				}
 			default:
