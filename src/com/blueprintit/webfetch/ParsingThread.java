@@ -77,25 +77,33 @@ public class ParsingThread implements Runnable
 			}
 			if (details!=null)
 			{
-				File file = details.getFile();
-				URL base = details.getUrl();
-				if ((file.isFile())&&(file.canRead()))
+				try
 				{
-					try
+					File file = details.getFile();
+					URL base = details.getUrl();
+					if ((file.isFile())&&(file.canRead()))
 					{
-						Collection links = parser.parseLinks(base, new FileReader(file));
-						Iterator loop = links.iterator();
-						while (loop.hasNext())
+						try
 						{
-							Link link = (Link)loop.next();
-							Environment env = new Environment(link.getUrl(),base);
-							webfetch.addEnvironmentForDecision(env);
+							Collection links = parser.parseLinks(base, new FileReader(file));
+							Iterator loop = links.iterator();
+							while (loop.hasNext())
+							{
+								Link link = (Link)loop.next();
+								Environment env = new Environment(link.getUrl(),base);
+								webfetch.addEnvironmentForDecision(env);
+							}
+						}
+						catch (IOException e)
+						{
+							
 						}
 					}
-					catch (IOException e)
-					{
-						
-					}
+				}
+				catch (Throwable t)
+				{
+					System.err.println("Error parsing "+details.getUrl());
+					t.printStackTrace();
 				}
 			}
 		}

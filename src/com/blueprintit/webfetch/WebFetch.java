@@ -85,16 +85,17 @@ public class WebFetch
 			public void downloadComplete(DownloadEvent e)
 			{
 				EnvironmentDownload download = (EnvironmentDownload)e.getDownload();
-				if (download.getLocalFile()!=null)
+				File localfile = download.getEnvironment().getFile();
+				if (localfile!=null)
 				{
-					System.out.println(e.getDownload().getURL()+" downloaded to "+e.getLocalFile());
+					System.out.println(e.getDownload().getURL()+" downloaded to "+localfile);
 				}
 				else
 				{
 					System.out.println(e.getDownload().getURL()+" downloaded");
 				}
 				boolean parse = false;
-				if (download.getLocalFile()==null)
+				if (localfile==null)
 				{
 					parse=true;
 				}
@@ -102,16 +103,16 @@ public class WebFetch
 				{
 					synchronized(filecache)
 					{
-						if (filecache.containsKey(download.getLocalFile()))
+						if (filecache.containsKey(localfile))
 						{
-							parse=((Boolean)filecache.get(download.getLocalFile())).booleanValue();
-							filecache.remove(download.getLocalFile());
+							parse=((Boolean)filecache.get(localfile)).booleanValue();
+							filecache.remove(localfile);
 						}
 					}
 				}
 				if (parse)
 				{
-					addParseDetails(new ParseDetails(download.getURL(),e.getLocalFile()));
+					addParseDetails(new ParseDetails(download.getURL(),localfile));
 				}
 			}
 

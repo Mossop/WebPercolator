@@ -144,32 +144,14 @@ public class DownloadQueue
 		{
 			list = new LinkedList(downloadListeners);
 		}
+		if (ev.getDownload() instanceof DownloadListener)
+		{
+			list.add(0,ev.getDownload());
+		}
 		Iterator loop = list.iterator();
 		while (loop.hasNext())
 		{
 			DownloadListener listener = (DownloadListener)loop.next();
-			switch (ev.getType())
-			{
-				case DownloadEvent.DOWNLOAD_STARTED:
-					listener.downloadStarted(ev);
-					break;
-				case DownloadEvent.DOWNLOAD_UPDATE:
-					listener.downloadUpdate(ev);
-					break;
-				case DownloadEvent.DOWNLOAD_COMPLETE:
-					listener.downloadComplete(ev);
-					break;
-				case DownloadEvent.DOWNLOAD_FAILED:
-					listener.downloadFailed(ev);
-					break;
-				case DownloadEvent.DOWNLOAD_REDIRECTED:
-					listener.downloadRedirected(ev);
-					break;
-			}
-		}
-		if (ev.getDownload() instanceof DownloadListener)
-		{
-			DownloadListener listener = (DownloadListener)ev.getDownload();
 			switch (ev.getType())
 			{
 				case DownloadEvent.DOWNLOAD_STARTED:

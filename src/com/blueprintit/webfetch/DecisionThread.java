@@ -155,10 +155,18 @@ public class DecisionThread implements Runnable
 			}
 			if (env!=null)
 			{
-				config.applyConfiguration(env);
-				if (env.isAccepted())
+				try
 				{
-					prepareDownload(env);
+					config.applyConfiguration(env);
+					if (env.isAccepted())
+					{
+						prepareDownload(env);
+					}
+				}
+				catch (Throwable t)
+				{
+					System.err.println("Error applying configuration to "+env.getTarget());
+					t.printStackTrace();
 				}
 			}
 		}

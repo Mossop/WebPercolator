@@ -112,7 +112,7 @@ public class Downloader implements Runnable
 					}
 					catch (IOException e)
 					{
-						e.printStackTrace();
+						//e.printStackTrace();
 						method.releaseConnection();
 						out.close();
 						queue.processDownloadEvent(DownloadEvent.createFailedDownloadEvent(queue,download,target,e));
@@ -120,7 +120,7 @@ public class Downloader implements Runnable
 				}
 				catch (IOException e) // Thrown when the file could not be opened for writing.
 				{
-					e.printStackTrace();
+					//e.printStackTrace();
 					method.releaseConnection();
 					queue.processDownloadEvent(DownloadEvent.createFailedDownloadEvent(queue,download,null,e));
 				}
@@ -140,13 +140,13 @@ public class Downloader implements Runnable
 		}
 		catch (HttpException e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
 			method.releaseConnection();
 			queue.processDownloadEvent(DownloadEvent.createFailedDownloadEvent(queue,download,null,e));
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
 			method.releaseConnection();
 			queue.processDownloadEvent(DownloadEvent.createFailedDownloadEvent(queue,download,null,e));
 		}
