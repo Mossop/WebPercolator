@@ -3,6 +3,7 @@ package com.blueprintit.webpercolator;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -31,10 +32,13 @@ public class DownloadQueue
 	private HttpClient agent;
 	private List listeners;
 	private HtmlLinkParser parser;
+	private Comparator ordering;
+	private boolean cancompare;
 	private MultiThreadedHttpConnectionManager manager;
 	
 	public DownloadQueue()
 	{
+		cancompare=true;
 		inprogress = Collections.synchronizedMap(new HashMap());
 		queue = Collections.synchronizedList(new LinkedList());
 		listeners = new LinkedList();
@@ -44,6 +48,7 @@ public class DownloadQueue
 		manager.setMaxTotalConnections(10);
 		manager.setMaxConnectionsPerHost(10);
 		parser = new Parser();
+		ordering = null;
 	}
 	
 	public HeadMethod getURLDetails(URL url) throws HttpException, IOException
@@ -213,6 +218,10 @@ public class DownloadQueue
 					pos++;
 				}
 			}
+			if (queue.size()==0)
+			{
+				cancompare=true;
+			}
 			if (inprogress.size()==0)
 			{
 				running=false;
@@ -220,9 +229,42 @@ public class DownloadQueue
 		}
 	}
 	
+	public synchronized void setOrdering(Comparator o)
+	{
+		ordering=o;
+		if (ordering!=null)
+		{
+			Collections.sort(queue,ordering);
+		}
+		else if (cancompare)
+		{
+			Collections.sort(queue);
+		}
+	}
+	
 	public synchronized void add(Download r)
 	{
-		queue.add(r);
+		if (!(r instanceof Comparable))
+		{
+			cancompare=false;
+		}
+		int pos = queue.size();
+		if ((ordering!=null)||(cancompare))
+		{
+			if (ordering!=null)
+			{
+				pos=Collections.binarySearch(queue,r,ordering);
+			}
+			else
+			{
+				pos=Collections.binarySearch(queue,r);
+			}
+			if (pos<0)
+			{
+				pos=-(pos+1);
+			}
+		}
+		queue.add(pos,r);
 		checkWaiting();
 	}
 	
