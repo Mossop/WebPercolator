@@ -113,7 +113,7 @@ public class ConfigurationSet extends Block
 
 	protected void setCascadingSetting(String name, boolean value)
 	{
-		setSetting(name,value,false);
+		setSetting(name,value,true);
 	}
 
 	protected void setLocalSetting(String name, int value)
@@ -123,7 +123,7 @@ public class ConfigurationSet extends Block
 
 	protected void setCascadingSetting(String name, int value)
 	{
-		setSetting(name,value,false);
+		setSetting(name,value,true);
 	}
 
 	protected void setLocalSetting(String name, Object value)
@@ -133,7 +133,7 @@ public class ConfigurationSet extends Block
 
 	protected void setCascadingSetting(String name, Object value)
 	{
-		setSetting(name,value,false);
+		setSetting(name,value,true);
 	}
 
 	protected void setSetting(String name, Object value, boolean cascading)

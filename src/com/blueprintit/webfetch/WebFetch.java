@@ -12,8 +12,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Set;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -35,6 +39,7 @@ public class WebFetch implements DownloadListener
 {
 	private Configuration config;
 	private DownloadQueue queue;
+	private Set urlcache;
 	
 	private static Log log = LogFactory.getLog(WebFetch.class);
 	
@@ -42,6 +47,7 @@ public class WebFetch implements DownloadListener
 	{
 		this.config=config;
 		queue = new DownloadQueue();
+		urlcache = Collections.synchronizedSet(new HashSet());
 		config.initialiseHttpState(queue.getHttpState());
 	}
 	
@@ -68,31 +74,38 @@ public class WebFetch implements DownloadListener
 		}
 	}
 	
-	public void addEnvironment(Environment env)
+	public synchronized void addEnvironment(Environment env)
 	{
-		config.applyConfiguration(env);
-		if (env.isAccepted())
+		if (!urlcache.contains(env.getTarget()))
 		{
-			if (env.getFile()==null)
+			urlcache.add(env.getTarget());
+			config.applyConfiguration(env);
+			if (env.isAccepted())
 			{
-				if (env.isParsing())
+				if (env.getFile()==null)
 				{
-					queue.add(new EnvironmentDownload(env));
+					if (env.isParsing())
+					{
+						log.info("Would download to temporary place and attempt to parse");
+						//queue.add(new EnvironmentDownload(env));
+					}
+					else
+					{
+						log.info("No point in downloading "+env.getTarget());
+					}
 				}
 				else
 				{
-					log.info("No point in downloading "+env.getTarget());
-				}
-			}
-			else
-			{
-				if ((!(env.getFile().exists()))||(env.isOverwriting()))
-				{
-					queue.add(new EnvironmentDownload(env));
-				}
-				else if (env.isParsing())
-				{
-					parse(env.getTarget(),env.getFile());
+					if ((!(env.getFile().exists()))||(env.isOverwriting()))
+					{
+						log.info("Would download to "+env.getFile().getAbsolutePath());
+						//queue.add(new EnvironmentDownload(env));
+					}
+					else if (env.isParsing())
+					{
+						log.info("Would parse "+env.getFile());
+						//parse(env.getTarget(),env.getFile());
+					}
 				}
 			}
 		}

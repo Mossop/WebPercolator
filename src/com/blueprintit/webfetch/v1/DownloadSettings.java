@@ -9,6 +9,9 @@ package com.blueprintit.webfetch.v1;
 import java.io.File;
 import java.net.URL;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.blueprintit.webfetch.Environment;
 import com.blueprintit.webpercolator.URLBuilder;
 
@@ -25,7 +28,8 @@ public class DownloadSettings
 	private boolean parse;
 	private boolean accept;
 	private boolean reject;
-	
+	private static Log log = LogFactory.getLog(DownloadSettings.class);
+
 	public DownloadSettings(File base, Environment env)
 	{
 		this.base=base;
