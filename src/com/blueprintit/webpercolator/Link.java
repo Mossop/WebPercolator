@@ -7,15 +7,15 @@ import java.net.URL;
  */
 public class Link
 {
-	private int type;
+	private LinkType type;
 	private URL url;
 	
 	public Link(URL url)
 	{
-		this(url,Download.UNSPECIFIED_DOWNLOAD);
+		this(url,LinkType.UNSPECIFIED);
 	}
 	
-	public Link(URL url, int type)
+	public Link(URL url, LinkType type)
 	{
 		this.url=url;
 		this.type=type;
@@ -24,14 +24,14 @@ public class Link
 	/**
 	 * @return Returns the type.
 	 */
-	public int getType()
+	public LinkType getType()
 	{
 		return type;
 	}
 	/**
 	 * @param type The type to set.
 	 */
-	public void setType(int type)
+	public void setType(LinkType type)
 	{
 		this.type = type;
 	}

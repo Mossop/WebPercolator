@@ -20,7 +20,6 @@ public class GetDownload implements DownloadListener, Download
 	private List listeners;
 	private URL url;
 	private URL referer;
-	private int type;
 	private File local;
 	private GetMethod method;
 	
@@ -31,16 +30,15 @@ public class GetDownload implements DownloadListener, Download
 	
 	public GetDownload(URL url, File local)
 	{
-		this(url,local,Download.UNSPECIFIED_DOWNLOAD,null);
+		this(url,local,null);
 	}
 	
-	public GetDownload(URL url, File local, int type, URL referer)
+	public GetDownload(URL url, File local, URL referer)
 	{
 		listeners = new LinkedList();
 		this.url=url;
 		this.referer=referer;
 		this.local=local;
-		this.type=type;
 		method = new GetMethod(url.toString());
 		if (referer!=null)
 		{
@@ -184,14 +182,6 @@ public class GetDownload implements DownloadListener, Download
 	}
 
 	/**
-	 * @see com.blueprintit.webpercolator.Download#getType()
-	 */
-	public int getType()
-	{
-		return type;
-	}
-
-	/**
 	 * @return Returns the url.
 	 */
 	public URL getUrl()
@@ -265,14 +255,6 @@ public class GetDownload implements DownloadListener, Download
 		{
 			method.setRequestHeader("Referer",referer.toString());
 		}
-	}
-	
-	/**
-	 * @param type The type to set.
-	 */
-	public void setType(int type)
-	{
-		this.type = type;
 	}
 	
 	/**

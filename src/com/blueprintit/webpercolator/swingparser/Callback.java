@@ -10,8 +10,8 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTMLEditorKit.ParserCallback;
 import javax.swing.text.html.HTML;
 
-import com.blueprintit.webpercolator.Download;
 import com.blueprintit.webpercolator.Link;
+import com.blueprintit.webpercolator.LinkType;
 
 /**
  * @author Dave
@@ -29,18 +29,18 @@ public class Callback extends ParserCallback
 		tagattrs = new HashMap();
 		links = new HashSet();
 		taglinktypes = new HashMap();
-		specifyLinkType(HTML.Tag.A,     HTML.Attribute.HREF, Download.LINK_DOWNLOAD);
-		specifyLinkType(HTML.Tag.IMG,   HTML.Attribute.SRC,  Download.IMAGE_DOWNLOAD);
-		specifyLinkType(HTML.Tag.FRAME, HTML.Attribute.SRC,  Download.FRAME_DOWNLOAD);
-		specifyLinkType(HTML.Tag.LINK,  HTML.Attribute.HREF, Download.UNSPECIFIED_DOWNLOAD);
-		specifyLinkType(HTML.Tag.INPUT, HTML.Attribute.SRC,  Download.IMAGE_DOWNLOAD);
-		specifyLinkType(HTML.Tag.AREA,  HTML.Attribute.HREF, Download.LINK_DOWNLOAD);
+		specifyLinkType(HTML.Tag.A,     HTML.Attribute.HREF, LinkType.LINK);
+		specifyLinkType(HTML.Tag.IMG,   HTML.Attribute.SRC,  LinkType.IMAGE);
+		specifyLinkType(HTML.Tag.FRAME, HTML.Attribute.SRC,  LinkType.FRAME);
+		specifyLinkType(HTML.Tag.LINK,  HTML.Attribute.HREF, LinkType.UNSPECIFIED);
+		specifyLinkType(HTML.Tag.INPUT, HTML.Attribute.SRC,  LinkType.IMAGE);
+		specifyLinkType(HTML.Tag.AREA,  HTML.Attribute.HREF, LinkType.LINK);
 	}
 	
-	public void specifyLinkType(HTML.Tag tag, HTML.Attribute attr, int type)
+	public void specifyLinkType(HTML.Tag tag, HTML.Attribute attr, LinkType type)
 	{
 		tagattrs.put(tag,attr);
-		taglinktypes.put(tag,new Integer(type));
+		taglinktypes.put(tag,type);
 	}
 	
 	public void handleSimpleTag(HTML.Tag tag, MutableAttributeSet attr, int pos)
@@ -73,7 +73,7 @@ public class Callback extends ParserCallback
 					if (value!=null)
 					{
 						URL newurl = new URL(base,value);
-						Link newlink = new Link(newurl,((Integer)taglinktypes.get(tag)).intValue());
+						Link newlink = new Link(newurl,(LinkType)taglinktypes.get(tag));
 						if (!links.contains(newlink))
 						{
 							links.add(newlink);

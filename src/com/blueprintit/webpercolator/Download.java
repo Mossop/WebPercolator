@@ -11,13 +11,6 @@ import org.apache.commons.httpclient.HttpMethod;
  */
 public interface Download
 {
-	public static final int UNSPECIFIED_DOWNLOAD = 0;
-	public static final int LINK_DOWNLOAD = 1;
-	public static final int IMAGE_DOWNLOAD = 2;
-	public static final int FRAME_DOWNLOAD = 3;
-	public static final int OBJECT_DOWNLOAD = 4;
-	public static final int APPLET_DOWNLOAD = 5;
-	
 	public HttpMethod getHttpMethod();
 	
 	public DownloadDetails getDownloadDetails(DownloadQueue queue) throws IOException;
@@ -25,6 +18,4 @@ public interface Download
 	public URL getURL();
 	
 	public File getLocalFile();
-	
-	public int getType();
 }

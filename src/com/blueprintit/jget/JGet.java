@@ -30,6 +30,7 @@ import com.blueprintit.webpercolator.DownloadQueue;
 import com.blueprintit.webpercolator.GetDownload;
 import com.blueprintit.webpercolator.HtmlLinkParser;
 import com.blueprintit.webpercolator.Link;
+import com.blueprintit.webpercolator.LinkType;
 
 /**
  * @author Dave
@@ -258,7 +259,7 @@ public class JGet implements DownloadListener
 		return aim;
 	}
 	
-	public synchronized void submitURL(URL url, Download parent, int recursedepth, int type)
+	public synchronized void submitURL(URL url, Download parent, int recursedepth)
 	{
 		if (!shouldDownload(url,parent))
 			return;
@@ -273,7 +274,7 @@ public class JGet implements DownloadListener
 			referer=parent.getURL();
 		}
 		
-		GetDownload download = new GetDownload(url,local,type,referer);
+		GetDownload download = new GetDownload(url,local,referer);
 
 		urlcache.add(url);
 		filecache.add(local);
@@ -326,22 +327,22 @@ public class JGet implements DownloadListener
 					while (loop.hasNext())
 					{
 						Link link = (Link)loop.next();
-						if ((link.getType()==Download.LINK_DOWNLOAD)&&(recursedepth!=0))
+						if ((link.getType()==LinkType.LINK)&&(recursedepth!=0))
 						{
 							//System.out.println("Recursing to "+link.getUrl());
-							submitURL(link.getUrl(),download,recursedepth-1,link.getType());
+							submitURL(link.getUrl(),download,recursedepth-1);
 						}
 						else
 						{
 							if (recursedepth==0)
 							{
 								//System.out.println("Recursing to "+link.getUrl());
-								submitURL(link.getUrl(),download,0,link.getType());
+								submitURL(link.getUrl(),download,0);
 							}
 							else
 							{
 								//System.out.println("Recursing to "+link.getUrl());
-								submitURL(link.getUrl(),download,recursedepth-1,link.getType());
+								submitURL(link.getUrl(),download,recursedepth-1);
 							}
 						}
 					}
@@ -372,7 +373,7 @@ public class JGet implements DownloadListener
 		Download parent = (Download)downloadparents.get(d);
 		System.out.println("Redirected from "+d.getURL()+" to "+e.getRedirectURL());
 		filecache.remove(d.getLocalFile());
-		submitURL(e.getRedirectURL(),parent,recurse.intValue(),d.getType());
+		submitURL(e.getRedirectURL(),parent,recurse.intValue());
 	}
 
 	public static void main(String[] args) throws Exception
@@ -637,9 +638,9 @@ public class JGet implements DownloadListener
 								while (loop.hasNext())
 								{
 									Link link = (Link)loop.next();
-									if (link.getType()==Download.LINK_DOWNLOAD)
+									if (link.getType()==LinkType.LINK)
 									{
-										submitURL(link.getUrl(),null,recursedepth,Download.UNSPECIFIED_DOWNLOAD);
+										submitURL(link.getUrl(),null,recursedepth);
 									}
 								}
 							}
@@ -652,7 +653,7 @@ public class JGet implements DownloadListener
 									try
 									{
 										URL link = new URL(base,line);
-										submitURL(link,null,recursedepth,Download.UNSPECIFIED_DOWNLOAD);
+										submitURL(link,null,recursedepth);
 									}
 									catch (MalformedURLException e)
 									{
@@ -681,7 +682,7 @@ public class JGet implements DownloadListener
 					try
 					{
 						URL link = new URL(base,test);
-						submitURL(link,null,recursedepth,Download.UNSPECIFIED_DOWNLOAD);
+						submitURL(link,null,recursedepth);
 					}
 					catch (MalformedURLException e)
 					{
