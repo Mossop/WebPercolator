@@ -24,7 +24,6 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 
 import com.blueprintit.webpercolator.Download;
-import com.blueprintit.webpercolator.DownloadDetails;
 import com.blueprintit.webpercolator.DownloadEvent;
 import com.blueprintit.webpercolator.DownloadListener;
 import com.blueprintit.webpercolator.DownloadQueue;
@@ -45,6 +44,14 @@ public class JGet implements DownloadListener
 	private File basedir;
 	private Collection urlcache;
 	private Collection filecache;
+	private Collection acceptfiles;
+	private Collection rejectfiles;
+	private Collection acceptdirs;
+	private Collection rejectdirs;
+	private Collection accepthosts;
+	private Collection rejecthosts;
+	
+	private static final String DEFAULT_FILENAME = "index.html";
 	
 	public JGet(String[] args) throws FileNotFoundException, IOException
 	{
@@ -55,7 +62,53 @@ public class JGet implements DownloadListener
 		downloadrecurses = Collections.synchronizedMap(new HashMap());
 		urlcache = Collections.synchronizedCollection(new LinkedList());
 		filecache = Collections.synchronizedCollection(new LinkedList());
+		acceptfiles = Collections.synchronizedCollection(new LinkedList());
+		rejectfiles = Collections.synchronizedCollection(new LinkedList());
+		accepthosts = Collections.synchronizedCollection(new LinkedList());
+		rejecthosts = Collections.synchronizedCollection(new LinkedList());
+		acceptdirs = Collections.synchronizedCollection(new LinkedList());
+		rejectdirs = Collections.synchronizedCollection(new LinkedList());
 		parseArguments(args);
+	}
+	
+	public String escapeRegex(String text)
+	{
+		text=text.replaceAll("\\.","\\\\.");
+		text=text.replaceAll("\\*",".*");
+		text=text.replaceAll("\\?",".");
+		//System.out.println("Generated regex "+text);
+		return "^"+text+"$";
+	}
+	
+	public boolean rejected(String text, Collection accept, Collection reject)
+	{
+		if ((accept.size()==0)&&(reject.size()==0))
+		{
+			return false;
+		}
+		//System.out.println("Testing "+text);
+		if (accept.size()>0)
+		{
+			Iterator loop = accept.iterator();
+			while (loop.hasNext())
+			{
+				String test = (String)loop.next();
+				if (text.matches(test))
+					return false;
+			}
+			return true;
+		}
+		if (reject.size()>0)
+		{
+			Iterator loop = reject.iterator();
+			while (loop.hasNext())
+			{
+				String test = (String)loop.next();
+				if (text.matches(test))
+					return true;
+			}
+		}
+		return false;
 	}
 	
 	public boolean shouldDownload(URL url, Download parent)
@@ -93,7 +146,36 @@ public class JGet implements DownloadListener
 				}
 			}
 		}
-		
+
+		// TODO implement accept and reject for files and directories
+		String host = url.getHost();
+		String path = url.getPath();
+		String file = "";
+		if (path.indexOf("/")>=0)
+		{
+			file=path.substring(path.lastIndexOf("/")+1);
+			path=path.substring(0,path.lastIndexOf("/"));
+		}
+		if (rejected(host,accepthosts,rejecthosts))
+		{
+			return false;
+		}
+		if (rejected(file,acceptfiles,rejectfiles))
+		{
+			return false;
+		}
+		String[] dirs = path.split("/");
+		for (int l = 0; l<dirs.length; l++)
+		{
+			if (dirs[l].length()>0)
+			{
+				if (rejected(dirs[l],acceptdirs,rejectdirs))
+				{
+					return false;
+				}
+			}
+		}
+
 		return true;
 	}
 	
@@ -146,12 +228,19 @@ public class JGet implements DownloadListener
 		String file = pathname.substring(pathname.lastIndexOf("/")+1);
 		if (file.length()==0)
 		{
-			file="index.html";
+			file=DEFAULT_FILENAME;
 		}
 		file=file.replace('*','_');
 		file=file.replace('?','_');
 		
 		File aim = new File(basedir,file);
+		if (aim.isDirectory())
+		{
+			basedir=aim;
+			file=DEFAULT_FILENAME;
+			aim = new File(basedir,file);
+		}
+		
 		if ((aim.exists())||(filecache.contains(aim)))
 		{
 			if (commandline.hasOption("r"))
@@ -179,44 +268,28 @@ public class JGet implements DownloadListener
 	
 	public synchronized void submitURL(URL url, Download parent, int recursedepth, int type)
 	{
+		if (!shouldDownload(url,parent))
+			return;
+		
+		File local = chooseFilename(url);
+		if (local==null)
+			return;
+		
 		URL referer = this.referer;
 		if (parent!=null)
 		{
 			referer=parent.getURL();
 		}
 		
-		GetDownload download = new GetDownload(url,null,type,referer);
+		GetDownload download = new GetDownload(url,local,type,referer);
 
-		try
-		{
-			DownloadDetails details = download.getDownloadDetails(queue);
-			if (!url.equals(details.getURL()))
-			{
-				url=details.getURL();
-				download.setUrl(url);
-			}
-			
-			if (!shouldDownload(url,parent))
-				return;
-			
-			File local = chooseFilename(url);
-			if (local==null)
-				return;
-			
-			download.setLocalFile(local);
-			
-			urlcache.add(url);
-			filecache.add(local);
-			
-			download.getHttpMethod().setFollowRedirects(false);
-			downloadparents.put(download,parent);
-			downloadrecurses.put(download,new Integer(recursedepth));
-			queue.add(download);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		urlcache.add(url);
+		filecache.add(local);
+		
+		download.getHttpMethod().setFollowRedirects(false);
+		downloadparents.put(download,parent);
+		downloadrecurses.put(download,new Integer(recursedepth));
+		queue.add(download);
 	}
 	
 	/**
@@ -306,6 +379,7 @@ public class JGet implements DownloadListener
 		Integer recurse = (Integer)downloadrecurses.get(d);
 		Download parent = (Download)downloadparents.get(d);
 		System.out.println("Redirected from "+d.getURL()+" to "+e.getRedirectURL());
+		filecache.remove(d.getLocalFile());
 		submitURL(e.getRedirectURL(),parent,recurse.intValue(),d.getType());
 	}
 
@@ -367,6 +441,12 @@ public class JGet implements DownloadListener
 		options.addOption(OptionBuilder.withLongOpt("accept").hasArg().withArgName("acclist").withDescription("Comma-separated list of file name suffixes to accept").create("A"));
 		options.addOption(OptionBuilder.withLongOpt("reject").hasArg().withArgName("rejlist").withDescription("Comma-separated list of file name suffixes to reject").create("R"));
 
+		options.addOption(OptionBuilder.withLongOpt("include-directories").hasArg().withArgName("list").withDescription("Comma-separated list of directory names to accept").create("I"));
+		options.addOption(OptionBuilder.withLongOpt("exclude-directories").hasArg().withArgName("list").withDescription("Comma-separated list of directory names to reject").create("X"));
+
+		options.addOption(OptionBuilder.withLongOpt("domains").hasArg().withArgName("domain-list").withDescription("Comma-separated list of domains to accept").create("D"));
+		options.addOption(OptionBuilder.withLongOpt("exclude-domains").hasArg().withArgName("domain-list").withDescription("Comma-separated list of domains to reject").create());
+
 		options.addOption("H","span-hosts",false,"Allow recursive retrieval to span hosts");
 		options.addOption("np","no-parent",false,"Do not ascend above the parent directory of the initial resource");
 
@@ -425,6 +505,111 @@ public class JGet implements DownloadListener
 						System.err.println("The argument to referer should be a valid url");
 					}
 				}
+				
+				if (commandline.hasOption("A"))
+				{
+					String[] list = commandline.getOptionValues("A");
+					for (int loop=0; loop<list.length; loop++)
+					{
+						String[] parts = list[loop].split(",");
+						for (int partloop=0; partloop<parts.length; partloop++)
+						{
+							if (parts[partloop].length()>0)
+							{
+								if (!parts[partloop].startsWith("*"))
+								{
+									parts[partloop]="*"+parts[partloop];
+								}
+								acceptfiles.add(escapeRegex(parts[partloop]));
+							}
+						}
+					}
+				}
+				
+				if (commandline.hasOption("R"))
+				{
+					String[] list = commandline.getOptionValues("R");
+					for (int loop=0; loop<list.length; loop++)
+					{
+						String[] parts = list[loop].split(",");
+						for (int partloop=0; partloop<parts.length; partloop++)
+						{
+							if (parts[partloop].length()>0)
+							{
+								if (!parts[partloop].startsWith("*"))
+								{
+									parts[partloop]="*"+parts[partloop];
+								}
+								rejectfiles.add(escapeRegex(parts[partloop]));
+							}
+						}
+					}
+				}
+				
+				if (commandline.hasOption("I"))
+				{
+					String[] list = commandline.getOptionValues("I");
+					for (int loop=0; loop<list.length; loop++)
+					{
+						String[] parts = list[loop].split(",");
+						for (int partloop=0; partloop<parts.length; partloop++)
+						{
+							if (parts[partloop].length()>0)
+							{
+								acceptdirs.add(escapeRegex(parts[partloop]));
+							}
+						}
+					}
+				}
+				
+				if (commandline.hasOption("X"))
+				{
+					String[] list = commandline.getOptionValues("X");
+					for (int loop=0; loop<list.length; loop++)
+					{
+						String[] parts = list[loop].split(",");
+						for (int partloop=0; partloop<parts.length; partloop++)
+						{
+							if (parts[partloop].length()>0)
+							{
+								rejectdirs.add(escapeRegex(parts[partloop]));
+							}
+						}
+					}
+				}
+				
+				if (commandline.hasOption("D"))
+				{
+					String[] list = commandline.getOptionValues("D");
+					for (int loop=0; loop<list.length; loop++)
+					{
+						String[] parts = list[loop].split(",");
+						for (int partloop=0; partloop<parts.length; partloop++)
+						{
+							if (parts[partloop].length()>0)
+							{
+								accepthosts.add(escapeRegex(parts[partloop]));
+							}
+						}
+					}
+				}
+				
+				if (commandline.hasOption("exclude-domains"))
+				{
+					String[] list = commandline.getOptionValues("exclude-domains");
+					for (int loop=0; loop<list.length; loop++)
+					{
+						String[] parts = list[loop].split(",");
+						for (int partloop=0; partloop<parts.length; partloop++)
+						{
+							if (parts[partloop].length()>0)
+							{
+								rejecthosts.add(escapeRegex(parts[partloop]));
+							}
+						}
+					}
+				}
+				
 				int recursedepth=0;
 				if (commandline.hasOption("r"))
 				{
