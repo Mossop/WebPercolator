@@ -59,6 +59,16 @@ public class EnvironmentDownload implements Download
 		}
 	}
 
+	public boolean isParsable()
+	{
+		return environment.isParsing();
+	}
+	
+	public Environment getEnvironment()
+	{
+		return environment;
+	}
+	
 	public URL getURL()
 	{
 		return environment.getTarget();

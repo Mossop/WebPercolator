@@ -17,6 +17,8 @@ public class Environment
 	private URL target;
 	private URL referer;
 	private File file = null;
+	private boolean overwriting = false;
+	private boolean parsing = true;
 	private boolean accepted = false;
 	private boolean rejected = false;
 	
@@ -51,7 +53,7 @@ public class Environment
 		this.target = target;
 	}
 
-	public boolean getAccepted()
+	public boolean isAccepted()
 	{
 		return accepted;
 	}
@@ -61,7 +63,7 @@ public class Environment
 		this.accepted = accepted;
 	}
 
-	public boolean getRejected()
+	public boolean isRejected()
 	{
 		return rejected;
 	}
@@ -79,5 +81,25 @@ public class Environment
 	public void setFile(File file)
 	{
 		this.file = file;
+	}
+	
+	public boolean isParsing()
+	{
+		return parsing;
+	}
+	
+	public void setParsing(boolean parsing)
+	{
+		this.parsing = parsing;
+	}
+	
+	public boolean isOverwriting()
+	{
+		return overwriting;
+	}
+	
+	public void setOverwriting(boolean overwriting)
+	{
+		this.overwriting = overwriting;
 	}
 }

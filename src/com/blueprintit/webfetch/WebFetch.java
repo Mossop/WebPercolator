@@ -22,27 +22,45 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import com.blueprintit.webfetch.v1.V1ConfigurationParser;
+import com.blueprintit.webpercolator.DownloadEvent;
+import com.blueprintit.webpercolator.DownloadListener;
 import com.blueprintit.webpercolator.DownloadQueue;
 
-public class WebFetch
+public class WebFetch implements DownloadListener
 {
 	private Configuration config;
 	private DownloadQueue queue;
 	
-	public WebFetch(Collection environments, Configuration config)
+	public WebFetch(Configuration config)
 	{
 		this.config=config;
 		queue = new DownloadQueue();
-		Iterator loop = environments.iterator();
-		while (loop.hasNext())
-		{
-			addEnvironment((Environment)loop.next());
-		}
+	}
+	
+	private void parse(File file)
+	{
+		
 	}
 	
 	public void addEnvironment(Environment env)
 	{
-		queue.add(new EnvironmentDownload(env));
+		config.applyConfiguration(env);
+		if (env.isAccepted())
+		{
+			if ((!(env.getFile().exists()))||(env.isOverwriting()))
+			{
+				queue.add(new EnvironmentDownload(env));
+			}
+			else if (env.isParsing())
+			{
+				parse(env.getFile());
+			}
+		}
+	}
+	
+	public int getRemaining()
+	{
+		return queue.getRemaining();
 	}
 	
 	public void start()
@@ -142,6 +160,7 @@ public class WebFetch
 		}
 		if (config!=null)
 		{
+			WebFetch wf = new WebFetch(config);
 			urls.addAll(config.getURLs());
 			Collection environments = new LinkedList();
 			Iterator loop = urls.iterator();
@@ -149,24 +168,49 @@ public class WebFetch
 			{
 				URL url = (URL)loop.next();
 				Environment env = new Environment(url);
-				config.applyConfiguration(env);
-				if (env.getAccepted())
-				{
-					environments.add(env);
-				}
+				wf.addEnvironment(env);
 			}
-			if (environments.size()>0)
+			if (wf.getRemaining()>0)
 			{
-				(new WebFetch(environments,config)).start();
+				wf.start();
 			}
 			else
 			{
-				System.err.println("No urls specified to download");
+				System.err.println("No valid urls specified to download");
 			}
 		}
 		else
 		{
 			System.err.println("No configuration was specified");
 		}
+	}
+
+	public void downloadStarted(DownloadEvent e)
+	{
+	}
+
+	public void downloadUpdate(DownloadEvent e)
+	{
+	}
+
+	public void downloadComplete(DownloadEvent e)
+	{
+		EnvironmentDownload download = (EnvironmentDownload)e.getDownload();
+		if (download.isParsable())
+		{
+			parse(download.getLocalFile());
+		}
+	}
+
+	public void downloadFailed(DownloadEvent e)
+	{
+	}
+
+	public void downloadRedirected(DownloadEvent e)
+	{
+		EnvironmentDownload download = (EnvironmentDownload)e.getDownload();
+		Environment env = download.getEnvironment();
+		Environment newenv = new Environment(e.getRedirectURL(),env.getReferer());
+		addEnvironment(newenv);
 	}
 }

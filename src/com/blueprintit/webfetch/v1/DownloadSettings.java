@@ -26,8 +26,8 @@ public class DownloadSettings
 		target = new URLBuilder(env.getTarget());
 		if (env.getReferer()!=null)
 			referer = new URLBuilder(env.getReferer());
-		accept=env.getAccepted();
-		reject=env.getRejected();
+		accept=env.isAccepted();
+		reject=env.isRejected();
 	}
 	
 	public DownloadSettings(URL target, URL referer)
