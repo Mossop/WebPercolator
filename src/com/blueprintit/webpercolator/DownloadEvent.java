@@ -109,4 +109,9 @@ public class DownloadEvent
 	{
 		return localFile;
 	}
+	
+	public void setLocalFile(File newfile)
+	{
+		localFile=newfile;
+	}
 }

@@ -103,16 +103,16 @@ public class WebFetch
 				{
 					synchronized(filecache)
 					{
-						if (filecache.containsKey(localfile))
+						if (filecache.containsKey(download.getLocalFile()))
 						{
-							parse=((Boolean)filecache.get(localfile)).booleanValue();
-							filecache.remove(localfile);
+							parse=((Boolean)filecache.get(download.getLocalFile())).booleanValue();
+							filecache.remove(download.getLocalFile());
 						}
 					}
 				}
 				if (parse)
 				{
-					addParseDetails(new ParseDetails(download.getURL(),localfile));
+					addParseDetails(new ParseDetails(download.getURL(),download.getLocalFile()));
 				}
 			}
 
@@ -357,8 +357,14 @@ public class WebFetch
 	public void addEnvironmentToDownload(Environment env)
 	{
 		env.setAttempts(env.getAttempts()-1);
-		queue.add(new EnvironmentDownload(env));
-		queue.start();
+		try
+		{
+			queue.add(new EnvironmentDownload(env));
+			queue.start();
+		}
+		catch (IOException e)
+		{
+		}
 	}
 		
 	public void start()
