@@ -18,7 +18,7 @@ import com.blueprintit.webfetch.ConfigurationParseException;
 /**
  * @author Dave
  */
-public class ConfigurationSet extends ConditionSet
+public class ConfigurationSet extends Block
 {
 	private List configsets;
 	private ConfigurationSet parent;
@@ -145,18 +145,22 @@ public class ConfigurationSet extends ConditionSet
 	{
 		if (newScope)
 			env.enterNewScope();
-		Iterator loop = configsets.iterator();
-		while (loop.hasNext())
+		execute(this,env);
+		if (!env.isDecided())
 		{
-			ConfigurationSet config = (ConfigurationSet)loop.next();
-			if (config.matches(env))
+			Iterator loop = configsets.iterator();
+			while (loop.hasNext())
 			{
-				config.applyConfigurationSet(env);
-				if (env.isDecided())
-					return;
+				ConfigurationSet config = (ConfigurationSet)loop.next();
+				if (config.matches(env))
+				{
+					config.applyConfigurationSet(env);
+					if (env.isDecided())
+						return;
+				}
 			}
+			doApplyConfigurationSet(env);
 		}
-		doApplyConfigurationSet(env);
 		if (newScope)
 			env.exitCurrentScope();
 	}

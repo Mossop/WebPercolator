@@ -6,10 +6,9 @@
  */
 package com.blueprintit.webfetch.v1;
 
-
 /**
  * @author Dave
  */
-public interface ConditionSet extends Condition
+public interface ActionSet extends Action
 {
 }
