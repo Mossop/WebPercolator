@@ -68,7 +68,15 @@ public class WebFetch
 							System.err.println("Unknown configuration version: "+version);
 							return null;
 					}
-					return parser.parseConfiguration(root);
+					try
+					{
+						return parser.parseConfiguration(document);
+					}
+					catch (ConfigurationParseException e)
+					{
+						System.err.println(e.getMessage());
+						return null;
+					}
 				}
 				else
 				{

@@ -1,8 +1,8 @@
 package com.blueprintit.webfetch.v1;
 
-import org.w3c.dom.Element;
-
+import org.w3c.dom.Document;
 import com.blueprintit.webfetch.Configuration;
+import com.blueprintit.webfetch.ConfigurationParseException;
 import com.blueprintit.webfetch.ConfigurationParser;
 
 /**
@@ -10,9 +10,8 @@ import com.blueprintit.webfetch.ConfigurationParser;
  */
 public class V1ConfigurationParser implements ConfigurationParser
 {
-	public Configuration parseConfiguration(Element document)
+	public Configuration parseConfiguration(Document document) throws ConfigurationParseException
 	{
-		return null;
+		return new V1Configuration(document.getDocumentElement());
 	}
-
 }
