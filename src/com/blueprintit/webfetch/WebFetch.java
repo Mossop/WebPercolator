@@ -79,17 +79,17 @@ public class WebFetch implements DownloadListener
 		HtmlLinkParser parser = queue.getLinkParser();
 		for (int loop=0; loop<100; loop++)
 		{
-			(new DecisionThread(this,config,urlcache,filecache)).start();
 			deciders++;
+			(new DecisionThread(this,config,urlcache,filecache)).start();
 		}
 		for (int loop=0; loop<10; loop++)
 		{
-			(new ParsingThread(this,parser)).start();
 			parsers++;
+			(new ParsingThread(this,parser)).start();
 		}
 	}
 	
-	private boolean isFinished()
+	private boolean isFinished(boolean queueEvent)
 	{
 		synchronized(sleepingDeciders)
 		{
@@ -99,6 +99,20 @@ public class WebFetch implements DownloadListener
 				{
 					synchronized(awaitingParse)
 					{
+						if (queueEvent)
+						{
+							if (queue.getRemaining()>1)
+							{
+								return false;
+							}
+						}
+						else
+						{
+							if (queue.getRemaining()>0)
+							{
+								return false;
+							}
+						}
 						if (sleepingDeciders.size()<deciders)
 						{
 							return false;
@@ -111,7 +125,7 @@ public class WebFetch implements DownloadListener
 						{
 							return false;
 						}
-						if (awaitingParse.size()>0)
+						if (awaitingParse.size()>1)
 						{
 							return false;
 						}
@@ -120,6 +134,14 @@ public class WebFetch implements DownloadListener
 			}
 		}
 		return true;
+	}
+	
+	public void potentiallyFinished(boolean queueEvent)
+	{
+		if (isFinished(queueEvent))
+		{
+			System.out.println("Downloads might be complete");
+		}
 	}
 	
 	private void wakeDecider()
@@ -160,6 +182,7 @@ public class WebFetch implements DownloadListener
 		{
 			sleepingDeciders.add(thread);
 		}
+		potentiallyFinished(false);
 	}
 	
 	public void registerSleepingParser(ParsingThread thread)
@@ -168,6 +191,7 @@ public class WebFetch implements DownloadListener
 		{
 			sleepingParsers.add(thread);
 		}
+		potentiallyFinished(false);
 	}
 	
 	public void addEnvironmentForDecision(Environment env)
@@ -256,11 +280,25 @@ public class WebFetch implements DownloadListener
 		{
 			addParseDetails(new ParseDetails(download.getURL(),e.getLocalFile()));
 		}
+		else
+		{
+			potentiallyFinished(true);
+		}
 	}
 
 	public void downloadFailed(DownloadEvent e)
 	{
-		System.err.println("Failed to download "+e.getDownload().getURL()+": "+e.getException().getMessage());
+		Environment env = ((EnvironmentDownload)e.getDownload()).getEnvironment();
+		if (env.getAttempts()>0)
+		{
+			System.out.println("Retrying download "+env.getTarget());
+			addEnvironmentToDownload(env);
+		}
+		else
+		{
+			System.err.println("Failed to download "+e.getDownload().getURL()+": "+e.getException().getMessage());
+			potentiallyFinished(true);
+		}
 	}
 
 	public void downloadRedirected(DownloadEvent e)
@@ -273,6 +311,7 @@ public class WebFetch implements DownloadListener
 	
 	public void addEnvironmentToDownload(Environment env)
 	{
+		env.setAttempts(env.getAttempts()-1);
 		queue.add(new EnvironmentDownload(env));
 		queue.start();
 	}

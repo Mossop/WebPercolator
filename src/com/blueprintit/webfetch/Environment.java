@@ -17,6 +17,7 @@ public class Environment
 	private URL target;
 	private URL referer;
 	private File file = null;
+	private int attempts = 3;
 	private boolean overwriting = false;
 	private boolean parsingLocal = true;
 	private boolean parsingRemote = true;
@@ -37,6 +38,16 @@ public class Environment
 	public URL getReferer()
 	{
 		return referer;
+	}
+	
+	public int getAttempts()
+	{
+		return attempts;
+	}
+	
+	public void setAttempts(int value)
+	{
+		attempts=value;
 	}
 	
 	public void setReferer(URL referer)
