@@ -125,6 +125,7 @@ public class EnvironmentDownload implements Download, DownloadListener
 			}
 			else
 			{
+				localfile=target;
 				e.setLocalFile(localfile);
 			}
 		}

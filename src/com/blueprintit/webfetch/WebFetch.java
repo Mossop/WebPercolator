@@ -103,16 +103,16 @@ public class WebFetch
 				{
 					synchronized(filecache)
 					{
-						if (filecache.containsKey(download.getLocalFile()))
+						if (filecache.containsKey(localfile))
 						{
-							parse=((Boolean)filecache.get(download.getLocalFile())).booleanValue();
-							filecache.remove(download.getLocalFile());
+							parse=((Boolean)filecache.get(localfile)).booleanValue();
+							filecache.remove(localfile);
 						}
 					}
 				}
 				if (parse)
 				{
-					addParseDetails(new ParseDetails(download.getURL(),download.getLocalFile()));
+					addParseDetails(new ParseDetails(download.getURL(),e.getLocalFile()));
 				}
 			}
 
